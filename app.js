@@ -100,7 +100,22 @@ if(button.dataset.id==='emf')openEmf();else if(button.dataset.id==='temperature'
 }));
 document.querySelectorAll('.nav-key').forEach(b=>b.addEventListener('click',()=>{if(b.dataset.page!=='home')show(b.textContent.trim(),'This navigation control is ready for its future screen. The original investigation prototype remains available unchanged.');}));
 document.getElementById('notesBtn').addEventListener('click',()=>show('Notes','The original Notes and observation log are preserved in the existing investigation prototype. We will connect them to this device design later.'));
-document.getElementById('menuBtn').addEventListener('click',()=>show('Ghost Intel Menu','Visual design prototype. Use the link below to open the preserved original investigation interface.'));
+function openMenu(){
+ title.textContent='Ghost Intel Menu';actions.hidden=false;drawer.hidden=false;
+ message.innerHTML='<span class="menu-info">Manage your current investigation. This does not remove the app or original prototype.</span><button type="button" class="menu-clear" id="menuClear">CLEAR ALL INVESTIGATION DATA</button><span class="menu-confirm" id="menuConfirm" hidden><strong>Reset the entire investigation?</strong><span>All EMF readings, evidence highlights, thermometer observations and active countdown will be cleared. This cannot be undone.</span><span class="menu-confirm-actions"><button type="button" id="menuClearYes">YES, RESET ALL</button><button type="button" id="menuClearNo">CANCEL</button></span></span>';
+ const confirm=document.getElementById('menuConfirm');
+ document.getElementById('menuClear').onclick=()=>{confirm.hidden=false;document.getElementById('menuClearYes').focus();};
+ document.getElementById('menuClearNo').onclick=()=>{confirm.hidden=true;document.getElementById('menuClear').focus();};
+ document.getElementById('menuClearYes').onclick=()=>{
+  entries=[];temp={phase:'placement',started:0,confirmed:false,checks:[]};
+  try{[...Array(localStorage.length)].map((_,i)=>localStorage.key(i)).filter(k=>k&&k.startsWith('ghost-intel-')).forEach(k=>localStorage.removeItem(k));}catch(e){}
+  update();tempTick();confirm.hidden=true;
+  message.innerHTML='<span class="menu-success">Investigation data cleared. EMF and Temperature are ready for a fresh investigation.</span><button type="button" class="menu-clear-done" id="menuDone">RETURN TO DASHBOARD</button>';
+  document.getElementById('menuDone').onclick=hide;
+ };
+ document.getElementById('closeDrawer').focus();
+}
+document.getElementById('menuBtn').addEventListener('click',openMenu);
 document.getElementById('closeDrawer').addEventListener('click',hide);
 document.getElementById('dismissDrawer').addEventListener('click',hide);
 drawer.addEventListener('click',e=>{if(e.target===drawer)hide();});
