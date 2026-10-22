@@ -122,10 +122,10 @@ function uvStep(step){
  const controls=items=>'<span class="uv-options">'+items.map(([label,value])=>'<button type="button" data-uv="'+value+'">'+label+'</button>').join('')+'</span>';
  if(step==='type'){
   uvDraft={type:null};
-  message.innerHTML='<span class="uv-title">WHAT DID THE GHOST INTERACT WITH?</span>'+controls([['SALT / FOOTPRINTS','salt'],['OBJECT / SURFACE','object']])+'<span class="uv-hint">Objects include doors, windows, light switches and other UV-capable surfaces.</span>'+uvStatsMarkup();
+  message.innerHTML='<span class="uv-title">WHAT DID THE GHOST INTERACT WITH?</span>'+controls([['SALT / FOOTPRINTS','salt'],['OBJECT / SURFACE','object']])+'<span class="uv-hint">Objects include doors, windows, light switches and other UV-capable surfaces.</span>';
   message.querySelectorAll('[data-uv]').forEach(b=>b.onclick=()=>{uvDraft.type=b.dataset.uv;uvStep('result');});
  }else if(step==='result'){
-  message.innerHTML='<span class="uv-title">DID YOU SEE UV?</span>'+controls([['YES — UV FOUND','yes'],['NO UV — CHECKED PROMPTLY','no'],['NOT SURE / SKIP','unsure']])+'<span class="uv-hint">Only select No UV if you checked promptly after a confirmed interaction. Salt footprints are tracked separately from Obake door/surface no-print odds.</span><button class="uv-back" id="uvBack">BACK</button>'+uvStatsMarkup();
+  message.innerHTML='<span class="uv-title">DID YOU SEE UV?</span>'+controls([['YES — UV FOUND','yes'],['NO UV — CHECKED PROMPTLY','no'],['NOT SURE / SKIP','unsure']])+'<span class="uv-hint">Only select No UV if you checked promptly after a confirmed interaction. Salt footprints are tracked separately from Obake door/surface no-print odds.</span><button class="uv-back" id="uvBack">BACK</button>';
   message.querySelectorAll('[data-uv]').forEach(b=>b.onclick=()=>{const result=b.dataset.uv;uvRecord(result,'not-asked',result==='no'&&uvDraft.type==='object');});
   document.getElementById('uvBack').onclick=()=>uvStep('type');
  }else{
