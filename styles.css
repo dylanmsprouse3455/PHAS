@@ -19,8 +19,8 @@
 
 
 /* EMF evidence status: illuminated device-frame overlay, original artwork unchanged */
-.equipment[data-id="emf"].evidence-confirmed{isolation:isolate;filter:drop-shadow(0 0 9px #23ef70) drop-shadow(0 0 3px #18d653)}
-.equipment[data-id="emf"].evidence-confirmed::after{content:"";position:absolute;inset:3px;border:4px solid #43fa81;border-radius:13px;pointer-events:none;box-shadow:inset 0 0 12px #22f76d,0 0 13px #18fa69;clip-path:polygon(0 8%,8% 0,92% 0,100% 8%,100% 92%,92% 100%,8% 100%,0 92%);}
+.equipment.evidence-confirmed{isolation:isolate;filter:drop-shadow(0 0 9px #23ef70) drop-shadow(0 0 3px #18d653)}
+.equipment.evidence-confirmed::after{content:"";position:absolute;inset:3px;border:4px solid #43fa81;border-radius:13px;pointer-events:none;box-shadow:inset 0 0 12px #22f76d,0 0 13px #18fa69;clip-path:polygon(0 8%,8% 0,92% 0,100% 8%,100% 92%,92% 100%,8% 100%,0 92%);}
 .emf-five-confirmed{border-color:#ff6565!important;background:linear-gradient(145deg,#803038,#3b1217 75%)!important;box-shadow:inset 0 0 18px #fc3b50,0 0 12px #ff364f,0 5px 0 #18090b!important}
 .emf-five-confirmed strong{color:#fff}
 .emf-confirmed{display:block;margin:-4px 0 15px;padding:12px;text-align:center;color:#ffb9b9;border:2px solid #e74851;background:#451b23;border-radius:10px;font:700 14px system-ui;box-shadow:0 0 12px #d92b3d65}
