@@ -70,3 +70,23 @@
 .emf-check.checked::before{content:'✓';margin-right:2px}
 .emf-caution{display:block;font:12px/1.45 system-ui;color:#f4d39b;margin:8px 0}
 .emf-caution[hidden]{display:none}
+
+
+/* EMF full-screen fit: one fixed device panel, no internal scrolling */
+.drawer:has(#emfChecks){padding:calc(env(safe-area-inset-top) + 8px) 8px calc(env(safe-area-inset-bottom) + 80px);overflow:hidden;align-items:center}
+.drawer:has(#emfChecks) .drawer-card{width:min(100%,480px);max-height:calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 100px);height:auto;overflow:visible;padding:clamp(10px,2.3dvh,18px);display:flex;flex-direction:column}
+.drawer:has(#emfChecks) .drawer-head{position:static;padding:0;background:transparent;flex-shrink:0}
+.drawer:has(#emfChecks) #drawerMessage{display:flex;flex-direction:column;gap:clamp(5px,1dvh,11px);min-height:0}
+.drawer:has(#emfChecks) .emf-prompt{margin:0;font-size:clamp(14px,2.2dvh,18px)}
+.drawer:has(#emfChecks) .emf-levels{margin:0;gap:5px}
+.drawer:has(#emfChecks) .emf-level{min-height:clamp(52px,9dvh,82px);gap:4px}
+.drawer:has(#emfChecks) .emf-level strong{font-size:clamp(20px,3.5dvh,26px)}
+.drawer:has(#emfChecks) .emf-warning{padding:8px 10px;font-size:clamp(11px,1.55dvh,13px);line-height:1.3}
+.drawer:has(#emfChecks) .emf-status{margin:0;font-size:clamp(12px,1.8dvh,14px)}
+.drawer:has(#emfChecks) .emf-checks{margin:0;gap:4px}
+.drawer:has(#emfChecks) .emf-check{aspect-ratio:auto;height:clamp(32px,5.5dvh,49px)}
+.drawer:has(#emfChecks) .emf-feedback{margin:0;min-height:0;font-size:clamp(11px,1.6dvh,13px);line-height:1.3}
+.drawer:has(#emfChecks) .emf-undo,.drawer:has(#emfChecks) .emf-clear{min-height:clamp(38px,5.5dvh,48px);margin:0}
+.drawer:has(#emfChecks) .emf-clear-confirm{margin:0;padding:9px;gap:5px;font-size:12px}
+.drawer:has(#emfChecks) .emf-clear-actions button{min-height:38px}
+@media(max-height:750px){.drawer:has(#emfChecks) .drawer-card{padding:9px}.drawer:has(#emfChecks) #drawerMessage{gap:5px}.drawer:has(#emfChecks) .emf-warning{padding:6px}.drawer:has(#emfChecks) .emf-level{min-height:50px}.drawer:has(#emfChecks) .emf-dot{width:9px;height:9px}}
