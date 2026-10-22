@@ -107,3 +107,27 @@
 .drawer:has(#emfChecks) .emf-warning{padding:11px 12px;line-height:1.45}
 .drawer:has(#emfChecks) .emf-check{height:clamp(37px,5.5dvh,50px)}
 @media(max-height:760px){.drawer:has(#emfChecks){padding-top:calc(env(safe-area-inset-top) + 45px);padding-bottom:calc(env(safe-area-inset-bottom) + 65px)}.drawer:has(#emfChecks) .drawer-card{transform:translateY(10px);max-height:calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 120px)}.drawer:has(#emfChecks) #drawerMessage{gap:7px}.drawer:has(#emfChecks) .emf-warning{padding:7px 9px}}
+
+
+/* Temperature companion: compact, independent of EMF */
+.temp-banner{position:relative;z-index:2;width:100%;display:flex;flex-direction:column;gap:5px;padding:9px 12px;border:2px solid #527a8c;border-radius:10px;background:linear-gradient(140deg,#1e313a,#111a21);color:#d8f1ff;text-align:left;font:600 12px system-ui;box-shadow:0 0 12px #3fa4dc33;cursor:pointer}
+.temp-banner[hidden]{display:none}
+.temp-banner-top{display:flex;justify-content:space-between;gap:8px}
+.temp-banner-top strong{letter-spacing:1px}
+.temp-track{height:9px;border-radius:10px;display:block;overflow:hidden;background:#10151a;border:1px solid #55636c}
+.temp-track>span{display:block;width:100%;height:100%;background:linear-gradient(90deg,#3a8ec5,#82ddf7);transition:width .4s linear}
+#tempBannerTime{font-size:11px;color:#b8d6e6}
+.drawer:has(.temp-heading){padding:calc(env(safe-area-inset-top) + 20px) 12px calc(env(safe-area-inset-bottom) + 95px);overflow:hidden;align-items:center}
+.drawer:has(.temp-heading) .drawer-card{width:min(100%,440px);max-height:calc(100dvh - 160px);overflow:hidden;padding:22px}
+.drawer:has(.temp-heading) #drawerMessage{display:flex;flex-direction:column;gap:17px;margin-top:18px}
+.temp-heading{font:800 clamp(17px,4vw,23px) system-ui;color:#e0f4ff;letter-spacing:.5px}
+.temp-description{font:14px/1.55 system-ui;color:#c4d2db}
+.temp-primary,.temp-secondary,.temp-options button{width:100%;min-height:55px;border:2px solid #628fa2;border-radius:10px;background:#183542;color:#f0faff;font:800 13px system-ui;letter-spacing:.4px}
+.temp-primary{background:#1b6b86;border-color:#82d7f4}
+.temp-countdown{font:800 25px system-ui;color:#86dcff;text-align:center;padding:12px;background:#14242c;border-radius:9px}
+.temp-options{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.temp-options button{min-height:88px;padding:8px}
+.temp-options .temp-freezing{background:#174d68;border-color:#6fcfff}
+.temp-sync{height:15px}.temp-sync>span{width:0}
+#tempSyncText{font:700 14px system-ui;text-align:center;color:#8bdbfa}
+@media(max-height:680px){.drawer:has(.temp-heading) .drawer-card{padding:12px}.drawer:has(.temp-heading) #drawerMessage{gap:9px;margin-top:8px}.temp-options button{min-height:65px}}
