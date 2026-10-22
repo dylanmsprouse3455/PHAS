@@ -94,36 +94,55 @@ setInterval(tempTick,1000);
 tempTick();
 
 
+
 const uvKey='ghost-intel-uv-v1';let uvEntries=[];
-try{const saved=JSON.parse(localStorage.getItem(uvKey)||'[]');if(Array.isArray(saved))uvEntries=saved;}catch(e){}
+try{const saved=JSON.parse(localStorage.getItem(uvKey)||'[]');if(Array.isArray(saved))uvEntries=saved.filter(x=>x&&['yes','no','unsure'].includes(x.result));}catch(e){}
 let uvDraft=null;
 function uvSave(){try{localStorage.setItem(uvKey,JSON.stringify(uvEntries));}catch(e){}}
 function uvSync(){const tile=document.querySelector('[data-id="uv"]');if(tile){const found=uvEntries.some(e=>e.result==='yes');tile.classList.toggle('evidence-confirmed',found);tile.setAttribute('aria-label',found?'UV evidence confirmed':'UV and Footprints');}}
-function uvRecord(result,unusual='not-asked'){
- uvEntries.push({type:uvDraft.type,result,unusual,time:new Date().toISOString()});uvSave();uvSync();uvStep('done');
+function uvStats(){
+ const negatives=uvEntries.filter(e=>e.result==='no'&&e.valid===true).length;
+ const positive=uvEntries.filter(e=>e.result==='yes').length;
+ const uncertain=uvEntries.length-negatives-positive;
+ const chance=Math.pow(.25,negatives)*100;
+ const percentage=negatives===0?'—':chance>=.01?chance.toFixed(2)+'%':chance.toExponential(2)+'%';
+ const warning=positive?'UV evidence confirmed. Negative checks are still logged.':negatives>=5?'Five valid negatives: strong warning against UV under standard settings; not an elimination.':negatives>=3?'Three valid negatives: UV is less likely under standard settings; not eliminated.':'Continue checking confirmed interactions promptly.';
+ return {negatives,positive,uncertain,percentage,warning};
+}
+function uvStatsMarkup(){
+ const s=uvStats();
+ return '<section class="uv-stats" aria-label="UV statistics"><strong>UV INTERACTION ANALYSIS</strong><span class="uv-stat-grid"><span><b>'+s.negatives+'</b><small>Valid negative checks</small></span><span><b>'+(s.positive?'CONFIRMED':s.percentage)+'</b><small>'+(s.positive?'UV evidence':'Obake no-print streak')+'</small></span></span><span class="uv-check-track">'+Array.from({length:5},(_,i)=>'<i class="'+(i<s.negatives?'filled':'')+'"></i>').join('')+'</span><span class="uv-hint">'+s.warning+'</span><span class="uv-hint">'+uvEntries.length+' total observations · '+s.uncertain+' uncertain/unverified</span><span class="uv-disclaimer">The percentage is the chance an Obake leaves no UV on every one of these independent valid checks (25% each), NOT the probability your ghost is Obake or that UV is absent.</span><button type="button" class="uv-back" id="uvUndo" '+(!uvEntries.length?'disabled':'')+'>UNDO LAST OBSERVATION</button></section>';
+}
+function uvAttachUndo(){const b=document.getElementById('uvUndo');if(b)b.onclick=()=>{if(!uvEntries.length)return;uvEntries.pop();uvSave();uvSync();uvStep('done');};}
+function uvRecord(result,unusual='not-asked',valid=false){
+ uvEntries.push({type:uvDraft.type,result,unusual,valid:result==='no'&&valid,time:new Date().toISOString()});uvSave();uvSync();uvStep('done');
 }
 function uvStep(step){
  title.textContent='UV / Fingerprints';actions.hidden=true;drawer.hidden=false;
- const controls=(items)=>'<span class="uv-options">'+items.map(([label,value])=>'<button type="button" data-uv="'+value+'">'+label+'</button>').join('')+'</span>';
+ const controls=items=>'<span class="uv-options">'+items.map(([label,value])=>'<button type="button" data-uv="'+value+'">'+label+'</button>').join('')+'</span>';
  if(step==='type'){
   uvDraft={type:null};
-  message.innerHTML='<span class="uv-title">WHAT DID THE GHOST INTERACT WITH?</span>'+controls([['DOOR / WINDOW','door'],['LIGHT SWITCH','switch'],['SALT FOOTPRINT','salt'],['OTHER / UNSURE','other']])+'<span class="uv-hint">Choose the interaction you checked with a UV light.</span>';
+  message.innerHTML='<span class="uv-title">WHAT DID THE GHOST INTERACT WITH?</span>'+controls([['DOOR / WINDOW','door'],['LIGHT SWITCH','switch'],['SALT FOOTPRINT','salt'],['OTHER / UNSURE','other']])+'<span class="uv-hint">Choose the interaction you checked with UV.</span>'+uvStatsMarkup();
   message.querySelectorAll('[data-uv]').forEach(b=>b.onclick=()=>{uvDraft.type=b.dataset.uv;uvStep('result');});
  }else if(step==='result'){
-  message.innerHTML='<span class="uv-title">DID YOU FIND A UV MARK?</span>'+controls([['YES — UV FOUND','yes'],['NO UV FOUND','no'],['NOT SURE / SKIP','unsure']])+'<span class="uv-hint">A missing UV mark does not rule out UV evidence. Check promptly after the interaction.</span><button class="uv-back" id="uvBack">BACK</button>';
-  message.querySelectorAll('[data-uv]').forEach(b=>b.onclick=()=>{uvDraft.result=b.dataset.uv;if(uvDraft.result==='yes')uvStep('unusual');else uvRecord(uvDraft.result);});
+  message.innerHTML='<span class="uv-title">DID YOU FIND A UV MARK?</span>'+controls([['YES — UV FOUND','yes'],['NO UV FOUND','no'],['NOT SURE / SKIP','unsure']])+'<span class="uv-hint">Missing UV does not rule it out. Check promptly after the interaction.</span><button class="uv-back" id="uvBack">BACK</button>'+uvStatsMarkup();
+  message.querySelectorAll('[data-uv]').forEach(b=>b.onclick=()=>{uvDraft.result=b.dataset.uv;if(uvDraft.result==='yes')uvStep('unusual');else if(uvDraft.result==='no')uvStep('valid');else uvRecord('unsure');});
   document.getElementById('uvBack').onclick=()=>uvStep('type');
+ }else if(step==='valid'){
+  message.innerHTML='<span class="uv-title">WAS THIS A VALID UV CHECK?</span><span class="uv-hint">Did you see the ghost interact with a UV-capable surface and inspect the correct spot promptly? If uncertain, do not count it toward the probability.</span>'+controls([['YES — VALID CHECK','valid'],['NO / NOT SURE','unverified']])+'<button class="uv-back" id="uvBack">BACK</button>'+uvStatsMarkup();
+  message.querySelectorAll('[data-uv]').forEach(b=>b.onclick=()=>uvRecord('no','not-asked',b.dataset.uv==='valid'));
+  document.getElementById('uvBack').onclick=()=>uvStep('result');
  }else if(step==='unusual'){
-  message.innerHTML='<span class="uv-title">ANYTHING UNUSUAL ABOUT THE PRINT?</span>'+controls([['SIX-FINGER HANDPRINT','six'],['UNUSUALLY FAST FADE','fade'],['LOOKED NORMAL','normal'],['NOT SURE / SKIP','unsure']])+'<span class="uv-hint">An unusual print may suggest Obake, but is not conclusive. Footprints are not handprints.</span>';
+  message.innerHTML='<span class="uv-title">ANYTHING UNUSUAL ABOUT THE PRINT?</span>'+controls([['SIX-FINGER HANDPRINT','six'],['UNUSUALLY FAST FADE','fade'],['LOOKED NORMAL','normal'],['NOT SURE / SKIP','unsure']])+'<span class="uv-hint">A six-finger handprint or quick fading can suggest Obake; neither alone confirms it.</span>'+uvStatsMarkup();
   message.querySelectorAll('[data-uv]').forEach(b=>b.onclick=()=>uvRecord('yes',b.dataset.uv));
  }else{
   const last=uvEntries[uvEntries.length-1],found=uvEntries.some(e=>e.result==='yes');
   const clue=last&&last.unusual==='six'&&last.type!=='salt'?'Possible Obake clue: six-finger handprint.':last&&last.unusual==='fade'?'Possible Obake clue: unusually short-lived UV mark.':'';
-  message.innerHTML='<span class="uv-title">'+(last?.result==='yes'?'UV EVIDENCE RECORDED':'OBSERVATION SAVED')+'</span><span class="uv-hint">'+(found?'UV evidence has been observed.':'No UV confirmed yet; absence is not elimination.')+'</span>'+(clue?'<span class="uv-clue">'+clue+'</span>':'')+'<span class="uv-hint">'+uvEntries.length+' UV observation(s) recorded this investigation.</span><button class="uv-primary" id="uvAgain">CHECK ANOTHER INTERACTION</button><button class="uv-back" id="uvDone">BACK TO DEVICE</button>';
+  message.innerHTML='<span class="uv-title">'+(last?.result==='yes'?'UV EVIDENCE RECORDED':last?'OBSERVATION SAVED':'UV OBSERVATIONS')+'</span><span class="uv-hint">'+(found?'UV evidence has been observed.':'No UV confirmed yet; absence is not elimination.')+'</span>'+(clue?'<span class="uv-clue">'+clue+'</span>':'')+uvStatsMarkup()+'<button class="uv-primary" id="uvAgain">CHECK ANOTHER INTERACTION</button><button class="uv-back" id="uvDone">BACK TO DEVICE</button>';
   document.getElementById('uvAgain').onclick=()=>uvStep('type');
   document.getElementById('uvDone').onclick=hide;
  }
- document.getElementById('closeDrawer').focus();
+ uvAttachUndo();document.getElementById('closeDrawer').focus();
 }
 function openUv(){uvStep('type');}
 uvSync();
