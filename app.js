@@ -247,26 +247,64 @@ function openWriting(){
 }
 writingSync();
 
+
+ // ===== EQUIPMENT: SALT & INTERACTION =====
+const saltKey='ghost-intel-salt-v1';
+const saltUvKey='ghost-intel-salt-uv-v1';
+let saltHistory=[];
+try{const saved=JSON.parse(localStorage.getItem(saltKey)||'[]');if(Array.isArray(saved))saltHistory=saved.filter(x=>x&&typeof x.salt==='string');}catch(e){}
+let saltStage='salt',saltCurrent='';
+function saltSave(){try{localStorage.setItem(saltKey,JSON.stringify(saltHistory));}catch(e){}}
+function saltSync(){const tile=document.querySelector('[data-id="salt"]');if(tile){tile.classList.toggle('observation-recorded',saltHistory.length>0);tile.setAttribute('aria-label','Salt and Interaction'+(saltHistory.length?' — '+saltHistory.length+' observations saved':''));}}
+function saltRecord(salt,uv){
+ const observation={id:'salt-'+Date.now()+'-'+saltHistory.length,time:new Date().toISOString(),salt,uv};
+ saltHistory.push(observation);saltSave();
+ // Salt footprints are not standard UV evidence and do not affect Obake calculations.
+ try{localStorage.setItem(saltUvKey,JSON.stringify(saltHistory.filter(x=>x.uv!=='not checked')));}catch(e){}
+ saltStage='result';saltSync();openSalt();
+}
+function openSalt(){
+ title.textContent='Salt & Interaction';actions.hidden=true;drawer.hidden=false;message.className='';
+ if(saltStage==='result'){
+  const last=saltHistory[saltHistory.length-1];if(!last){saltStage='salt';openSalt();return;}
+  const saltText=last.salt==='yes'?'Yes':last.salt==='no'?'No':'Not sure';
+  const uvText=last.uv==='found'?'Found':last.uv==='not seen'?'Not seen':last.uv==='unsure'?'Not sure':'Not checked';
+  const reason=last.salt==='yes'?'A confirmed ghost salt step is strong evidence against Wraith.':last.salt==='no'?'No salt interaction observed; no ghost can be excluded.':'Salt interaction uncertain; no ghost can be excluded.';
+  message.innerHTML='<section class="salt-panel"><div class="salt-captured"><strong class="salt-captured-title">✓ &nbsp;OBSERVATION CAPTURED</strong><div class="salt-fact"><span>Salt interaction</span><b>'+saltText+'</b></div><div class="salt-fact"><span>UV footprints</span><b>'+uvText+'</b></div><div class="salt-rule"></div><div class="salt-confirm">✓ &nbsp;Added to observation history</div>'+(last.uv!=='not checked'?'<div class="salt-confirm">✓ &nbsp;UV observations synchronized</div>':'')+'<p>'+reason+'</p><small>Obake fingerprint counter unchanged. Salt footprints do not qualify for that counter.</small></div><button type="button" class="salt-again" id="saltAgain">RECORD ANOTHER</button><button type="button" class="spirit-back" id="saltDone">BACK TO DASHBOARD</button></section>';
+  document.getElementById('saltAgain').onclick=()=>{saltStage='salt';openSalt();};
+  document.getElementById('saltDone').onclick=()=>{saltStage='salt';hide();};
+ }else{
+  const second=saltStage==='uv';
+  message.innerHTML='<section class="spirit-panel salt-questions"><span class="spirit-step">OBSERVATION '+(second?'2':'1')+'</span><strong class="spirit-heading">'+(second?'DID YOU SEE UV FOOTPRINTS?':'DID THE GHOST STEP IN SALT?')+'</strong><small>'+(second?'Check the disturbed salt area promptly with UV.':'Look for a disturbed salt pile.')+'</small><div class="spirit-answers"><button type="button" id="saltYes">YES</button><button type="button" id="saltNo">NO</button></div><button type="button" class="spirit-back" id="saltUnsure">NOT SURE</button>'+(second?'<button type="button" class="spirit-back" id="saltBack">BACK</button>':'')+'</section>';
+  const choose=value=>{if(second)saltRecord(saltCurrent,value==='yes'?'found':value==='no'?'not seen':'unsure');else if(value==='yes'){saltCurrent='yes';saltStage='uv';openSalt();}else saltRecord(value,'not checked');};
+  document.getElementById('saltYes').onclick=()=>choose('yes');
+  document.getElementById('saltNo').onclick=()=>choose('no');
+  document.getElementById('saltUnsure').onclick=()=>choose('unsure');
+  if(second)document.getElementById('saltBack').onclick=()=>{saltStage='salt';openSalt();};
+ }
+}
+saltSync();
+
 uvSync();
 
 update();
 document.querySelectorAll('.equipment').forEach(button=>button.addEventListener('click',()=>{
 button.classList.add('pressed');setTimeout(()=>button.classList.remove('pressed'),150);
-if(button.dataset.id==='emf')openEmf();else if(button.dataset.id==='temperature')openTemp();else if(button.dataset.id==='uv')openUv();else if(button.dataset.id==='spirit')openSpirit();else if(button.dataset.id==='orbs')openOrbs();else if(button.dataset.id==='dots')openDots();else if(button.dataset.id==='writing')openWriting();else show(names[button.dataset.id],'This is the visual dashboard prototype. The equipment control is pressable; its observation questions will be connected after we approve the design.');
+if(button.dataset.id==='emf')openEmf();else if(button.dataset.id==='temperature')openTemp();else if(button.dataset.id==='uv')openUv();else if(button.dataset.id==='spirit')openSpirit();else if(button.dataset.id==='orbs')openOrbs();else if(button.dataset.id==='dots')openDots();else if(button.dataset.id==='writing')openWriting();else if(button.dataset.id==='salt'){saltStage='salt';openSalt();}else show(names[button.dataset.id],'This is the visual dashboard prototype. The equipment control is pressable; its observation questions will be connected after we approve the design.');
 }));
 document.querySelectorAll('.nav-key').forEach(b=>b.addEventListener('click',()=>{if(b.dataset.page!=='home')show(b.textContent.trim(),'This navigation control is ready for its future screen. The original investigation prototype remains available unchanged.');}));
 document.getElementById('notesBtn').addEventListener('click',()=>show('Notes','The original Notes and observation log are preserved in the existing investigation prototype. We will connect them to this device design later.'));
 function openMenu(){
  title.textContent='Ghost Intel Menu';actions.hidden=false;drawer.hidden=false;
- message.innerHTML='<span class="menu-info">Manage your current investigation. This does not remove the app or original prototype.</span><button type="button" class="menu-clear" id="menuClear">CLEAR ALL INVESTIGATION DATA</button><span class="menu-confirm" id="menuConfirm" hidden><strong>Reset the entire investigation?</strong><span>All EMF readings, UV observations, evidence highlights, thermometer, Spirit Box, Ghost Orbs, D.O.T.S. and Ghost Writing observations and active countdown will be cleared. This cannot be undone.</span><span class="menu-confirm-actions"><button type="button" id="menuClearYes">YES, RESET ALL</button><button type="button" id="menuClearNo">CANCEL</button></span></span>';
+ message.innerHTML='<span class="menu-info">Manage your current investigation. This does not remove the app or original prototype.</span><button type="button" class="menu-clear" id="menuClear">CLEAR ALL INVESTIGATION DATA</button><span class="menu-confirm" id="menuConfirm" hidden><strong>Reset the entire investigation?</strong><span>All EMF readings, UV observations, evidence highlights, thermometer, Spirit Box, Ghost Orbs, D.O.T.S. and Ghost Writing and Salt observations and active countdown will be cleared. This cannot be undone.</span><span class="menu-confirm-actions"><button type="button" id="menuClearYes">YES, RESET ALL</button><button type="button" id="menuClearNo">CANCEL</button></span></span>';
  const confirm=document.getElementById('menuConfirm');
  document.getElementById('menuClear').onclick=()=>{confirm.hidden=false;document.getElementById('menuClearYes').focus();};
  document.getElementById('menuClearNo').onclick=()=>{confirm.hidden=true;document.getElementById('menuClear').focus();};
  document.getElementById('menuClearYes').onclick=()=>{
-  entries=[];temp={phase:'placement',started:0,confirmed:false,checks:[]};uvEntries=[];spirit={checks:[],answer:''};orbs={checks:[],answer:''};spiritSkip=false;spiritShowChecklist=false;orbsSkip=false;orbsShowChecklist=false;dots={checks:[],answer:''};dotsSkip=false;dotsShowChecklist=false;writing={checks:[],answer:''};writingSkip=false;writingShowChecklist=false;
+  entries=[];temp={phase:'placement',started:0,confirmed:false,checks:[]};uvEntries=[];spirit={checks:[],answer:''};orbs={checks:[],answer:''};spiritSkip=false;spiritShowChecklist=false;orbsSkip=false;orbsShowChecklist=false;dots={checks:[],answer:''};dotsSkip=false;dotsShowChecklist=false;writing={checks:[],answer:''};writingSkip=false;writingShowChecklist=false;saltHistory=[];saltStage='salt';
   try{[...Array(localStorage.length)].map((_,i)=>localStorage.key(i)).filter(k=>k&&k.startsWith('ghost-intel-')).forEach(k=>localStorage.removeItem(k));}catch(e){}
-  update();tempTick();uvSync();spiritSync();orbsSync();dotsSync();writingSync();confirm.hidden=true;
-  message.innerHTML='<span class="menu-success">Investigation data cleared. EMF, Temperature, UV, Spirit Box, Ghost Orbs, D.O.T.S. and Ghost Writing are ready for a fresh investigation.</span><button type="button" class="menu-clear-done" id="menuDone">RETURN TO DASHBOARD</button>';
+  update();tempTick();uvSync();spiritSync();orbsSync();dotsSync();writingSync();saltSync();confirm.hidden=true;
+  message.innerHTML='<span class="menu-success">Investigation data cleared. EMF, Temperature, UV, Spirit Box, Ghost Orbs, D.O.T.S. and Ghost Writing and Salt are ready for a fresh investigation.</span><button type="button" class="menu-clear-done" id="menuDone">RETURN TO DASHBOARD</button>';
   document.getElementById('menuDone').onclick=hide;
  };
  document.getElementById('closeDrawer').focus();
