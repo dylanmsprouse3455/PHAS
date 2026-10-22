@@ -55,3 +55,10 @@
 .emf-clear-confirm{scroll-margin-bottom:24px}
 .emf-clear-actions{position:relative;z-index:2}
 @media(max-width:400px){.drawer-card{padding:16px}.drawer-head{top:-16px}.emf-level{min-height:72px}.emf-prompt{margin:12px 0}.emf-warning{padding:10px}}
+
+
+/* iPhone Safari bottom address bar: reserve a permanent unobstructed action zone */
+.drawer{display:flex;align-items:flex-start;justify-content:center;padding:calc(env(safe-area-inset-top) + 12px) 12px calc(env(safe-area-inset-bottom) + 112px);overflow-y:auto}
+.drawer-card{width:min(100%,410px);max-height:calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 144px);overflow-y:auto;flex-shrink:0;padding-bottom:24px;scroll-padding-bottom:32px}
+.emf-clear-confirm{scroll-margin-bottom:35px}
+@media(min-width:700px){.drawer{align-items:center;padding-bottom:24px}.drawer-card{max-height:calc(100dvh - 60px)}}
