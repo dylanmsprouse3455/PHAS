@@ -251,3 +251,10 @@
 .uv-surface-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
 .uv-surface-grid button,.uv-surface-choice>button{min-height:38px;padding:6px;border:1px solid #729cb1;border-radius:7px;background:#284b5e;color:#edf9ff;font:700 11px system-ui}
 .uv-surface-grid button:last-child{background:#383b3e;border-color:#7b8389}
+
+/* Standalone UV item question: replace counter content instead of expanding it */
+.drawer:has(#drawerMessage.uv-surface-choice) #drawerMessage{display:flex;flex-direction:column;gap:15px;margin-top:14px;padding:16px}
+.drawer:has(#drawerMessage.uv-surface-choice) .drawer-card{overflow:hidden;max-height:calc(100dvh - 100px)}
+.drawer:has(#drawerMessage.uv-surface-choice) .uv-surface-grid{grid-template-columns:1fr 1fr;gap:10px}
+.drawer:has(#drawerMessage.uv-surface-choice) .uv-surface-grid button{min-height:62px;font-size:12px}
+.drawer:has(#drawerMessage.uv-surface-choice) #uvChoiceBack,.drawer:has(#drawerMessage.uv-surface-choice) #uvChoiceClose{min-height:44px;border:1px solid #6d96a9;border-radius:8px;background:#284b5e;color:#f0faff;font:800 12px system-ui}
