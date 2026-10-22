@@ -36,7 +36,7 @@ drawer.hidden=false;update();syncActive();
 message.querySelectorAll('[data-level]').forEach(b=>b.addEventListener('click',()=>log(Number(b.dataset.level))));
 document.getElementById('emfStop').addEventListener('click',stopReading);
 const clearConfirm=document.getElementById('emfClearConfirm');
-document.getElementById('emfClear').addEventListener('click',()=>{clearConfirm.hidden=false;});
+document.getElementById('emfClear').addEventListener('click',()=>{clearConfirm.hidden=false;requestAnimationFrame(()=>clearConfirm.scrollIntoView({behavior:'smooth',block:'end'}));});
 document.getElementById('emfClearNo').addEventListener('click',()=>{clearConfirm.hidden=true;});
 document.getElementById('emfClearYes').addEventListener('click',()=>{entries=[];active=null;if(ticker){clearInterval(ticker);ticker=null;}try{localStorage.removeItem(key);localStorage.removeItem('ghost-intel-emf-active');}catch(e){}clearConfirm.hidden=true;update();syncActive();document.getElementById('emfFeedback').textContent='All EMF interactions cleared. Ready for a new investigation.';});
 document.getElementById('emfUndo').addEventListener('click',()=>{if(active)return;entries.pop();save();update();document.getElementById('emfFeedback').textContent='Last reading removed.';});
