@@ -7,7 +7,11 @@ function hide(){drawer.hidden=true;}
 const key='ghost-intel-emf-v1';let entries=[];
 try{const x=JSON.parse(localStorage.getItem(key)||'[]');if(Array.isArray(x))entries=x.filter(v=>[1,2,3,4,5].includes(v.level)&&typeof v.eligible==='boolean');}catch(e){}
 const save=()=>{try{localStorage.setItem(key,JSON.stringify(entries));}catch(e){}};
-let lastTap=0;
+let lastTap=0;let active=null;let ticker=null;
+try{const a=JSON.parse(localStorage.getItem('ghost-intel-emf-active')||'null');if(a&&[1,2,3,4,5].includes(a.level)&&Number.isFinite(a.start)&&a.start<=Date.now())active=a;}catch(e){}
+function clock(){if(!active)return;const sec=Math.max(0,Math.floor((Date.now()-active.start)/1000));const t=document.getElementById('emfTimer');if(t)t.textContent=String(Math.floor(sec/60)).padStart(2,'0')+':'+String(sec%60).padStart(2,'0');}
+function syncActive(){const running=!!active;document.querySelectorAll('.emf-level').forEach(b=>{b.disabled=running;b.classList.toggle('emf-running',running&&Number(b.dataset.level)===active?.level);});const box=document.getElementById('emfRunning');if(box)box.hidden=!running;const undo=document.getElementById('emfUndo');if(undo)undo.disabled=running||!entries.length;clock();if(ticker)clearInterval(ticker);ticker=running?setInterval(clock,250):null;}
+function stopReading(){if(!active)return;const a=active;active=null;try{localStorage.removeItem('ghost-intel-emf-active');}catch(e){};entries.push({level:a.level,eligible:a.level===2||a.level===3,time:new Date(a.start).toISOString(),durationMs:Math.max(0,Date.now()-a.start)});save();update();syncActive();const f=document.getElementById('emfFeedback');if(f)f.textContent='EMF '+a.level+' saved: '+(entries[entries.length-1].durationMs/1000).toFixed(1)+' seconds. Ready for the next interaction.';}
 function update(){
 const confirmed=entries.some(x=>x.level===5);const tile=document.querySelector('[data-id="emf"]');if(tile){tile.classList.toggle('evidence-confirmed',confirmed);tile.setAttribute('aria-label',confirmed?'EMF Activity — EMF Level 5 confirmed':'EMF Activity');}
 const five=document.querySelector('.emf-5');if(five){five.classList.toggle('emf-five-confirmed',confirmed);five.setAttribute('aria-pressed',String(confirmed));}const check=document.getElementById('emfConfirmed');if(check){check.hidden=!confirmed;}
@@ -15,22 +19,22 @@ const el=document.getElementById('emfStatus'),undo=document.getElementById('emfU
 if(!el)return;
 const count=entries.filter(x=>x.eligible).length;
 el.textContent='Eligible interactions: '+count+'/7'+(count>=7?' — EMF 5 remains possible.':'');
-undo.disabled=entries.length===0;
+undo.disabled=!!active||entries.length===0;
 }
 function log(level){
-const now=Date.now();if(now-lastTap<650)return;lastTap=now;
-
-if(level===5&&entries.some(x=>x.level===5)){document.getElementById('emfFeedback').textContent='EMF Level 5 already marked. Use Undo if this was a mistake.';return;}
-entries.push({level,eligible:level===2||level===3,time:new Date().toISOString()});
-save();update();
-document.getElementById('emfFeedback').textContent=level===5?'EMF 5 observed and recorded.':(level===2||level===3)?'EMF '+level+' logged. Wait for a separate interaction before tapping again.':'EMF '+level+' logged. This reading does not advance the eligible-interaction counter.';
+const now=Date.now();if(active||now-lastTap<650)return;lastTap=now;
+if(level===5&&entries.some(x=>x.level===5)){document.getElementById('emfFeedback').textContent='EMF Level 5 is already recorded. Undo to correct it.';return;}
+active={level,start:now};try{localStorage.setItem('ghost-intel-emf-active',JSON.stringify(active));}catch(e){}
+document.getElementById('emfFeedback').textContent='Reading in progress. Wait until the EMF stops, then press STOP READING.';
+syncActive();
 }
 function openEmf(){
 title.textContent='EMF Activity';actions.hidden=true;
-message.innerHTML='<span class="emf-prompt">What did you observe?</span><span class="emf-levels" role="group" aria-label="Observed EMF level">'+[1,2,3,4,5].map(n=>'<button type="button" class="emf-level emf-'+n+'" data-level="'+n+'" aria-label="Record EMF level '+n+'"><span class="emf-dot"></span><strong>'+n+'</strong></button>').join('')+'</span><span id="emfConfirmed" class="emf-confirmed" hidden>☑ EMF LEVEL 5 REACHED</span><span class="emf-warning"><strong>One tap = one new reading.</strong> Selecting a box prepares the panel for the next separate EMF interaction. Do not click repeatedly for the same interaction; duplicate readings can distort the results.</span><span class="emf-status" id="emfStatus"></span><span class="emf-feedback" id="emfFeedback" role="status" aria-live="polite"></span><button type="button" class="emf-undo" id="emfUndo">Undo last reading</button>';
-drawer.hidden=false;update();
+message.innerHTML='<span class="emf-prompt">What did you observe?</span><span class="emf-levels" role="group" aria-label="Observed EMF level">'+[1,2,3,4,5].map(n=>'<button type="button" class="emf-level emf-'+n+'" data-level="'+n+'" aria-label="Record EMF level '+n+'"><span class="emf-dot"></span><strong>'+n+'</strong></button>').join('')+'</span><span id="emfConfirmed" class="emf-confirmed" hidden>☑ EMF LEVEL 5 REACHED</span><span class="emf-warning"><strong>One reading at a time.</strong> Tap the observed level to start timing. Do not select another number while EMF is active. When the reading ends in-game, press the large STOP button.</span><span id="emfRunning" class="emf-running-panel" hidden><span class="emf-running-label">EMF READING ACTIVE — DO NOT TAP OTHER LEVELS</span><span class="emf-timer" id="emfTimer">00:00</span><button type="button" class="emf-stop" id="emfStop">■ STOP READING</button></span><span class="emf-status" id="emfStatus"></span><span class="emf-feedback" id="emfFeedback" role="status" aria-live="polite"></span><button type="button" class="emf-undo" id="emfUndo">Undo last reading</button>';
+drawer.hidden=false;update();syncActive();
 message.querySelectorAll('[data-level]').forEach(b=>b.addEventListener('click',()=>log(Number(b.dataset.level))));
-document.getElementById('emfUndo').addEventListener('click',()=>{entries.pop();save();update();document.getElementById('emfFeedback').textContent='Last reading removed.';});
+document.getElementById('emfStop').addEventListener('click',stopReading);
+document.getElementById('emfUndo').addEventListener('click',()=>{if(active)return;entries.pop();save();update();document.getElementById('emfFeedback').textContent='Last reading removed.';});
 document.getElementById('closeDrawer').focus();
 }
 update();
