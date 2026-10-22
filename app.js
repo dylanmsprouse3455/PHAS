@@ -112,13 +112,13 @@ function openUv(){
  const next=found?'Evidence confirmed.':count>=5?'Consider other evidence, but do not rule out UV completely.':'Check the next ghost interaction for UV.';
  message.innerHTML='<section class="uv-live uv-counter"><strong class="uv-title">UV INVESTIGATION</strong><span class="uv-counter-label">GHOST INTERACTIONS WITH NO UV</span><div class="uv-counter-controls"><button type="button" id="uvMinus" aria-label="Remove one interaction" '+(count===0||found?'disabled':'')+'>−</button><div class="uv-counter-number"><strong>'+count+'</strong><small>RECORDED</small></div><button type="button" id="uvPlus" aria-label="Record another interaction without UV" '+(found?'disabled':'')+'>+</button></div><p class="uv-counter-hint">Tap + to record what the ghost touched. Only prompt checks of UV-capable surfaces count.</p><div class="uv-probability"><div class="uv-probability-heading"><strong>Chance an Obake could have tricked you</strong><button type="button" id="uvInfo" aria-label="Explain Obake probability">ⓘ</button></div><strong class="uv-percent">'+percent+'</strong><div class="uv-probability-track"><span style="width:'+probability+'%"></span></div><small>'+trickText+'</small></div><div class="uv-live-result"><strong>'+heading+'</strong><span>'+explanation+'</span><small>'+next+'</small></div><label class="uv-live-found"><input id="uvFound" type="checkbox" '+(found?'checked':'')+'> UV FOUND</label><small class="uv-counter-details" id="uvDetails" hidden></small></section>';
  document.getElementById('uvPlus').onclick=()=>{
-  const panel=document.getElementById('uvSurfaceChoice');
-  if(panel){panel.remove();return;}
-  const choice=document.createElement('div');choice.id='uvSurfaceChoice';choice.className='uv-surface-choice';
+  title.textContent='UV — What was touched?';
+  const choice=message;choice.className='uv-surface-choice';
   choice.innerHTML='<strong>What did the ghost touch?</strong><div class="uv-surface-grid"><button type="button" data-surface="door">Door</button><button type="button" data-surface="window">Window</button><button type="button" data-surface="switch">Light switch</button><button type="button" data-surface="other">Salt / thrown object / unsure</button></div><small>Only count a fresh interaction on a UV-capable surface checked promptly.</small>';
-  document.querySelector('.uv-counter-controls').insertAdjacentElement('afterend',choice);
+  choice.innerHTML+='<button type="button" id="uvChoiceBack">BACK TO COUNTER</button>';
+  document.getElementById('uvChoiceBack').onclick=openUv;
   choice.querySelectorAll('[data-surface]').forEach(button=>button.onclick=()=>{
-   if(button.dataset.surface==='other'){choice.innerHTML='<strong>Not counted</strong><small>That interaction cannot reliably lower the Obake no-UV percentage. Wait for a UV-capable surface interaction.</small><button type="button" id="uvChoiceClose">OK</button>';document.getElementById('uvChoiceClose').onclick=()=>choice.remove();return;}
+   if(button.dataset.surface==='other'){choice.innerHTML='<strong>Not counted</strong><small>That interaction cannot reliably lower the Obake no-UV percentage. Wait for a UV-capable surface interaction.</small><button type="button" id="uvChoiceClose">OK</button>';document.getElementById('uvChoiceClose').onclick=openUv;return;}
    uvEntries.push({type:'object',surface:button.dataset.surface,result:'no',valid:true,time:new Date().toISOString()});uvSave();uvSync();openUv();
   });
  };
