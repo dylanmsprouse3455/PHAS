@@ -122,23 +122,15 @@ function uvStep(step){
  const controls=items=>'<span class="uv-options">'+items.map(([label,value])=>'<button type="button" data-uv="'+value+'">'+label+'</button>').join('')+'</span>';
  if(step==='type'){
   uvDraft={type:null};
-  message.innerHTML='<span class="uv-title">WHAT DID THE GHOST INTERACT WITH?</span>'+controls([['DOOR / WINDOW','door'],['LIGHT SWITCH','switch'],['SALT FOOTPRINT','salt'],['OTHER / UNSURE','other']])+'<span class="uv-hint">Choose the interaction you checked with UV.</span>'+uvStatsMarkup();
+  message.innerHTML='<span class="uv-title">WHAT DID THE GHOST INTERACT WITH?</span>'+controls([['SALT / FOOTPRINTS','salt'],['OBJECT / SURFACE','object']])+'<span class="uv-hint">Objects include doors, windows, light switches and other UV-capable surfaces.</span>'+uvStatsMarkup();
   message.querySelectorAll('[data-uv]').forEach(b=>b.onclick=()=>{uvDraft.type=b.dataset.uv;uvStep('result');});
  }else if(step==='result'){
-  message.innerHTML='<span class="uv-title">DID YOU FIND A UV MARK?</span>'+controls([['YES — UV FOUND','yes'],['NO UV FOUND','no'],['NOT SURE / SKIP','unsure']])+'<span class="uv-hint">Missing UV does not rule it out. Check promptly after the interaction.</span><button class="uv-back" id="uvBack">BACK</button>'+uvStatsMarkup();
-  message.querySelectorAll('[data-uv]').forEach(b=>b.onclick=()=>{uvDraft.result=b.dataset.uv;if(uvDraft.result==='yes')uvStep('unusual');else if(uvDraft.result==='no')uvStep('valid');else uvRecord('unsure');});
+  message.innerHTML='<span class="uv-title">DID YOU SEE UV?</span>'+controls([['YES — UV FOUND','yes'],['NO UV — CHECKED PROMPTLY','no'],['NOT SURE / SKIP','unsure']])+'<span class="uv-hint">Only select No UV if you checked promptly after a confirmed interaction. Salt footprints are tracked separately from Obake door/surface no-print odds.</span><button class="uv-back" id="uvBack">BACK</button>'+uvStatsMarkup();
+  message.querySelectorAll('[data-uv]').forEach(b=>b.onclick=()=>{const result=b.dataset.uv;uvRecord(result,'not-asked',result==='no'&&uvDraft.type==='object');});
   document.getElementById('uvBack').onclick=()=>uvStep('type');
- }else if(step==='valid'){
-  message.innerHTML='<span class="uv-title">WAS THIS A VALID UV CHECK?</span><span class="uv-hint">Did you see the ghost interact with a UV-capable surface and inspect the correct spot promptly? If uncertain, do not count it toward the probability.</span>'+controls([['YES — VALID CHECK','valid'],['NO / NOT SURE','unverified']])+'<button class="uv-back" id="uvBack">BACK</button>'+uvStatsMarkup();
-  message.querySelectorAll('[data-uv]').forEach(b=>b.onclick=()=>uvRecord('no','not-asked',b.dataset.uv==='valid'));
-  document.getElementById('uvBack').onclick=()=>uvStep('result');
- }else if(step==='unusual'){
-  message.innerHTML='<span class="uv-title">ANYTHING UNUSUAL ABOUT THE PRINT?</span>'+controls([['SIX-FINGER HANDPRINT','six'],['UNUSUALLY FAST FADE','fade'],['LOOKED NORMAL','normal'],['NOT SURE / SKIP','unsure']])+'<span class="uv-hint">A six-finger handprint or quick fading can suggest Obake; neither alone confirms it.</span>'+uvStatsMarkup();
-  message.querySelectorAll('[data-uv]').forEach(b=>b.onclick=()=>uvRecord('yes',b.dataset.uv));
  }else{
   const last=uvEntries[uvEntries.length-1],found=uvEntries.some(e=>e.result==='yes');
-  const clue=last&&last.unusual==='six'&&last.type!=='salt'?'Possible Obake clue: six-finger handprint.':last&&last.unusual==='fade'?'Possible Obake clue: unusually short-lived UV mark.':'';
-  message.innerHTML='<span class="uv-title">'+(last?.result==='yes'?'UV EVIDENCE RECORDED':last?'OBSERVATION SAVED':'UV OBSERVATIONS')+'</span><span class="uv-hint">'+(found?'UV evidence has been observed.':'No UV confirmed yet; absence is not elimination.')+'</span>'+(clue?'<span class="uv-clue">'+clue+'</span>':'')+uvStatsMarkup()+'<button class="uv-primary" id="uvAgain">CHECK ANOTHER INTERACTION</button><button class="uv-back" id="uvDone">BACK TO DEVICE</button>';
+  message.innerHTML='<span class="uv-title">'+(last?.result==='yes'?'UV EVIDENCE RECORDED':last?'OBSERVATION SAVED':'UV OBSERVATIONS')+'</span><span class="uv-hint">'+(found?'UV evidence has been observed.':'No UV confirmed yet; absence is not elimination.')+'</span>'+uvStatsMarkup()+'<button class="uv-primary" id="uvAgain">CHECK ANOTHER INTERACTION</button><button class="uv-back" id="uvDone">BACK TO DEVICE</button>';
   document.getElementById('uvAgain').onclick=()=>uvStep('type');
   document.getElementById('uvDone').onclick=hide;
  }
