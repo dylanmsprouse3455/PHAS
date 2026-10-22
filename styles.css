@@ -162,3 +162,18 @@
 .uv-primary,.uv-back{min-height:46px;width:100%;border:2px solid #6ca9c6;border-radius:9px;background:#21516a;color:#e9f8ff;font:800 12px system-ui}
 .uv-back{border-color:#58616a;background:#252c32}
 @media(max-height:690px){.drawer:has(.uv-title) .drawer-card{padding:12px}.drawer:has(.uv-title) #drawerMessage{gap:9px;margin-top:8px}.uv-options button{min-height:58px}}
+
+
+/* Compact UV probability counter */
+.uv-stats{display:flex;flex-direction:column;gap:9px;padding:11px;border:1px solid #557c8e;border-radius:10px;background:#14242e;font-family:system-ui}
+.uv-stats>strong{font-size:12px;letter-spacing:1px;color:#bde9ff}
+.uv-stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.uv-stat-grid>span{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:10px 4px;border-radius:7px;background:#0b1921}
+.uv-stat-grid b{font-size:clamp(17px,4.5vw,23px);color:#e0f7ff}
+.uv-stat-grid small{text-align:center;font-size:10px;color:#b9cbd5}
+.uv-check-track{display:grid;grid-template-columns:repeat(5,1fr);gap:5px}
+.uv-check-track i{height:9px;border-radius:3px;background:#36434a}
+.uv-check-track i.filled{background:#75bfe2}
+.uv-disclaimer{font:10px/1.4 system-ui;color:#a5b8c3}
+.uv-stats .uv-back{min-height:38px}
+.uv-stats .uv-back:disabled{opacity:.45}
