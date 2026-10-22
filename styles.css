@@ -297,3 +297,18 @@
 .salt-captured small{color:#bcd9c8;font:400 11px/1.5 system-ui}
 .salt-again{border:0;border-radius:100px;background:#eef1ef;color:#11191c;font:750 15px system-ui;min-height:53px;width:100%}
 .equipment.observation-recorded:after{content:"✓";position:absolute;right:5px;top:5px;display:grid;place-items:center;width:20px;height:20px;border-radius:50%;background:#285d42;color:#d6f6df;font:800 13px system-ui;box-shadow:0 0 0 2px #10191c}
+
+
+/* ===== UNIFIED EQUIPMENT STATUS BADGES =====
+   Evidence and observation flags retain their independent logic.
+   Both are represented by a clear check badge rather than glowing borders. */
+.equipment.evidence-confirmed,
+.equipment.observation-recorded{isolation:isolate;filter:drop-shadow(0 7px 2px #000a)}
+.equipment.evidence-confirmed::after,
+.equipment.observation-recorded::after{
+ content:"✓";position:absolute;inset:auto 6px auto auto;top:6px;
+ width:30px;height:30px;display:grid;place-items:center;
+ border:2px solid #9de8b8;border-radius:50%;background:#24583c;
+ color:#e8fff0;font:900 20px/1 system-ui;box-shadow:0 0 0 3px #10191ce8,0 2px 7px #000a;
+ clip-path:none;pointer-events:none;z-index:3;
+}
