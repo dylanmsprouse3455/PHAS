@@ -334,3 +334,15 @@
 .intel-note-reason{margin-top:6px;padding-top:9px;border-top:1px solid #536c77;color:#c8dce4;font:500 12px/1.55 system-ui}
 .intel-note-reason[hidden]{display:none}
 .intel-stuck{min-height:50px;border:1px solid #b9c5c9;border-radius:11px;background:#d9e3e6;color:#14232a;font:900 15px system-ui}
+
+
+/* Ghost List iPhone layout: scoped overrides for legacy drawer/button rules */
+#drawerMessage:has(.intel-grid){display:block!important;width:100%;min-width:0;margin-top:12px}
+#drawerMessage .intel-panel{display:flex!important;flex-direction:column!important;width:100%;min-width:0;gap:14px}
+#drawerMessage .intel-grid{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;grid-auto-flow:row!important;gap:8px!important;width:100%!important;min-width:0!important;align-items:stretch!important;justify-items:stretch!important}
+#drawerMessage .intel-grid > button.intel-ghost{display:flex!important;align-items:center!important;justify-content:center!important;float:none!important;position:relative!important;box-sizing:border-box!important;width:100%!important;max-width:100%!important;min-width:0!important;min-height:51px!important;height:auto!important;margin:0!important;padding:8px 3px!important;border:2px solid #cda953!important;border-radius:9px!important;background:#514327!important;color:#ffe3a0!important;box-shadow:none!important;transform:none!important;text-align:center!important;white-space:normal!important;overflow-wrap:break-word!important;word-break:normal!important;font:700 clamp(11px,3vw,14px)/1.15 system-ui!important}
+#drawerMessage .intel-grid > button.intel-ghost.red{border-color:#e17880!important;background:#592d33!important;color:#ffd2d5!important}
+#drawerMessage .intel-grid > button.intel-ghost.green{border-color:#80d39d!important;background:#28523e!important;color:#ddffe7!important}
+#drawerMessage .intel-grid > button.intel-ghost:focus-visible{outline:3px solid #edf7ff!important;outline-offset:2px}
+.drawer:has(.intel-grid) .drawer-card{overflow-y:auto!important;max-height:calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 55px)!important}
+@media(max-width:360px){#drawerMessage .intel-grid{gap:5px!important}#drawerMessage .intel-grid > button.intel-ghost{font-size:11px!important;padding-inline:2px!important}}
