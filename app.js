@@ -134,8 +134,10 @@ function openUv(){
 function checklistHidden(key,forceShow){try{return !forceShow&&localStorage.getItem(key)==='true';}catch(e){return false;}}
 function rememberChecklistHidden(key){try{localStorage.setItem(key,'true');}catch(e){}}
 function wireChecklistNavigation(prefix,hideKey,open,skip){
+ const checkbox=document.getElementById(prefix+'Never');
+ checkbox.checked=checklistHidden(hideKey,false);
+ checkbox.onchange=()=>{try{if(checkbox.checked)localStorage.setItem(hideKey,'true');else localStorage.removeItem(hideKey);}catch(e){}};
  document.getElementById(prefix+'Skip').onclick=()=>skip(false);
- document.getElementById(prefix+'Never').onclick=()=>{rememberChecklistHidden(hideKey);skip(true);};
 }
 
 // ===== EQUIPMENT: SPIRIT BOX =====
@@ -153,7 +155,7 @@ function openSpirit(){
 
  const done=spiritItems.every(([id])=>spirit.checks.includes(id))||spiritSkip||checklistHidden(spiritHideKey,spiritShowChecklist);
  if(!done){
-  message.innerHTML='<section class="spirit-panel"><span class="spirit-step">STEP 1 OF 2</span><strong class="spirit-heading">PREPARE YOUR SPIRIT BOX</strong><small>Check each item as you complete it.</small><div class="spirit-checks">'+spiritItems.map(([id,label])=>'<button type="button" class="spirit-check '+(spirit.checks.includes(id)?'is-checked':'')+'" data-spirit-check="'+id+'" aria-pressed="'+spirit.checks.includes(id)+'"><span class="spirit-checkmark">'+(spirit.checks.includes(id)?'✓':'□')+'</span><span>'+label+'</span></button>').join('')+'</div><span class="spirit-progress">'+spirit.checks.length+' OF 4 COMPLETE</span><small>Some ghosts respond only when you are alone. Try that if needed.</small><button type="button" class="spirit-back checklist-skip" id="spiritSkip">SKIP CHECKLIST</button><button type="button" class="spirit-back" id="spiritNever">DON&#39;T SHOW AGAIN</button></section>';
+  message.innerHTML='<section class="spirit-panel"><span class="spirit-step">STEP 1 OF 2</span><strong class="spirit-heading">PREPARE YOUR SPIRIT BOX</strong><small>Check each item as you complete it.</small><div class="spirit-checks">'+spiritItems.map(([id,label])=>'<button type="button" class="spirit-check '+(spirit.checks.includes(id)?'is-checked':'')+'" data-spirit-check="'+id+'" aria-pressed="'+spirit.checks.includes(id)+'"><span class="spirit-checkmark">'+(spirit.checks.includes(id)?'✓':'□')+'</span><span>'+label+'</span></button>').join('')+'</div><span class="spirit-progress">'+spirit.checks.length+' OF 4 COMPLETE</span><small>Some ghosts respond only when you are alone. Try that if needed.</small><button type="button" class="spirit-back checklist-skip" id="spiritSkip">SKIP CHECKLIST</button><label class="help-dismiss"><input type="checkbox" id="spiritNever"> Don&#39;t show this checklist again</label></section>';
   wireChecklistNavigation('spirit',spiritHideKey,openSpirit,(remember)=>{spiritSkip=true;spiritShowChecklist=false;openSpirit();});
   message.querySelectorAll('[data-spirit-check]').forEach(b=>b.onclick=()=>{const id=b.dataset.spiritCheck;spirit.checks=spirit.checks.includes(id)?spirit.checks.filter(x=>x!==id):[...spirit.checks,id];spiritSave();openSpirit();});
  }else{
@@ -181,7 +183,7 @@ function openOrbs(){
 
  const done=orbsItems.every(([id])=>orbs.checks.includes(id))||orbsSkip||checklistHidden(orbsHideKey,orbsShowChecklist);
  if(!done){
-  message.innerHTML='<section class="spirit-panel"><span class="spirit-step">STEP 1 OF 2</span><strong class="spirit-heading">SET UP YOUR CAMERA</strong><small>Check each item as you complete it.</small><div class="spirit-checks">'+orbsItems.map(([id,label])=>'<button type="button" class="spirit-check '+(orbs.checks.includes(id)?'is-checked':'')+'" data-orbs-check="'+id+'" aria-pressed="'+orbs.checks.includes(id)+'"><span class="spirit-checkmark">'+(orbs.checks.includes(id)?'✓':'□')+'</span><span>'+label+'</span></button>').join('')+'</div><span class="spirit-progress">'+orbs.checks.length+' OF 4 COMPLETE</span><button type="button" class="spirit-back checklist-skip" id="orbsSkip">SKIP CHECKLIST</button><button type="button" class="spirit-back" id="orbsNever">DON&#39;T SHOW AGAIN</button></section>';
+  message.innerHTML='<section class="spirit-panel"><span class="spirit-step">STEP 1 OF 2</span><strong class="spirit-heading">SET UP YOUR CAMERA</strong><small>Check each item as you complete it.</small><div class="spirit-checks">'+orbsItems.map(([id,label])=>'<button type="button" class="spirit-check '+(orbs.checks.includes(id)?'is-checked':'')+'" data-orbs-check="'+id+'" aria-pressed="'+orbs.checks.includes(id)+'"><span class="spirit-checkmark">'+(orbs.checks.includes(id)?'✓':'□')+'</span><span>'+label+'</span></button>').join('')+'</div><span class="spirit-progress">'+orbs.checks.length+' OF 4 COMPLETE</span><button type="button" class="spirit-back checklist-skip" id="orbsSkip">SKIP CHECKLIST</button><label class="help-dismiss"><input type="checkbox" id="orbsNever"> Don&#39;t show this checklist again</label></section>';
   wireChecklistNavigation('orbs',orbsHideKey,openOrbs,(remember)=>{orbsSkip=true;orbsShowChecklist=false;openOrbs();});
   message.querySelectorAll('[data-orbs-check]').forEach(b=>b.onclick=()=>{const id=b.dataset.orbsCheck;orbs.checks=orbs.checks.includes(id)?orbs.checks.filter(x=>x!==id):[...orbs.checks,id];orbsSave();openOrbs();});
  }else{
@@ -207,7 +209,7 @@ function openDots(){
  title.textContent='D.O.T.S. Projector';actions.hidden=true;drawer.hidden=false;message.className='';
  const done=dotsItems.every(([id])=>dots.checks.includes(id))||dotsSkip||checklistHidden(dotsHideKey,dotsShowChecklist);
  if(!done){
-  message.innerHTML='<section class="spirit-panel"><span class="spirit-step">STEP 1 OF 2</span><strong class="spirit-heading">SET UP D.O.T.S.</strong><small>Check each step as you complete it. Finish all four to continue, or skip below.</small><div class="spirit-checks">'+dotsItems.map(([id,label])=>'<button type="button" class="spirit-check '+(dots.checks.includes(id)?'is-checked':'')+'" data-dots-check="'+id+'" aria-pressed="'+dots.checks.includes(id)+'"><span class="spirit-checkmark">'+(dots.checks.includes(id)?'✓':'□')+'</span><span>'+label+'</span></button>').join('')+'</div><span class="spirit-progress">'+dots.checks.length+' OF 4 COMPLETE</span><button type="button" class="spirit-back checklist-skip" id="dotsSkip">SKIP CHECKLIST</button><button type="button" class="spirit-back" id="dotsNever">DON&#39;T SHOW AGAIN</button></section>';
+  message.innerHTML='<section class="spirit-panel"><span class="spirit-step">STEP 1 OF 2</span><strong class="spirit-heading">SET UP D.O.T.S.</strong><small>Check each step as you complete it. Finish all four to continue, or skip below.</small><div class="spirit-checks">'+dotsItems.map(([id,label])=>'<button type="button" class="spirit-check '+(dots.checks.includes(id)?'is-checked':'')+'" data-dots-check="'+id+'" aria-pressed="'+dots.checks.includes(id)+'"><span class="spirit-checkmark">'+(dots.checks.includes(id)?'✓':'□')+'</span><span>'+label+'</span></button>').join('')+'</div><span class="spirit-progress">'+dots.checks.length+' OF 4 COMPLETE</span><button type="button" class="spirit-back checklist-skip" id="dotsSkip">SKIP CHECKLIST</button><label class="help-dismiss"><input type="checkbox" id="dotsNever"> Don&#39;t show this checklist again</label></section>';
   wireChecklistNavigation('dots',dotsHideKey,openDots,(remember)=>{dotsSkip=true;dotsShowChecklist=false;openDots();});
   message.querySelectorAll('[data-dots-check]').forEach(b=>b.onclick=()=>{const id=b.dataset.dotsCheck;dots.checks=dots.checks.includes(id)?dots.checks.filter(x=>x!==id):[...dots.checks,id];dotsSave();openDots();});
  }else{
@@ -219,26 +221,52 @@ function openDots(){
 }
 dotsSync();
 
+
+ // ===== EQUIPMENT: GHOST WRITING =====
+const writingKey='ghost-intel-writing-v1';
+const writingHideKey='ghost-intel-writing-hide-checklist';
+let writing={checks:[],answer:''};
+try{const saved=JSON.parse(localStorage.getItem(writingKey)||'null');if(saved&&Array.isArray(saved.checks))writing={checks:saved.checks.filter(x=>['book','room','placed','wait'].includes(x)),answer:['yes','no',''].includes(saved.answer)?saved.answer:''};}catch(e){}
+let writingSkip=false,writingShowChecklist=false;
+const writingItems=[['book','Ghost Writing Book is available'],['room',"Book is in the ghost's activity area"],['placed','Book is placed where the ghost can reach it'],['wait',"I've waited and checked the book for writing"]];
+function writingSave(){try{localStorage.setItem(writingKey,JSON.stringify(writing));}catch(e){}}
+function writingSync(){const tile=document.querySelector('[data-id="writing"]');if(tile)tile.classList.toggle('evidence-confirmed',writing.answer==='yes');}
+function openWriting(){
+ title.textContent='Ghost Writing';actions.hidden=true;drawer.hidden=false;message.className='';
+ const done=writingItems.every(([id])=>writing.checks.includes(id))||writingSkip||checklistHidden(writingHideKey,writingShowChecklist);
+ if(!done){
+  message.innerHTML='<section class="spirit-panel"><span class="spirit-step">STEP 1 OF 2</span><strong class="spirit-heading">SET UP GHOST WRITING</strong><small>Check each step as you complete it. Finish all four to continue, or skip below.</small><div class="spirit-checks">'+writingItems.map(([id,label])=>'<button type="button" class="spirit-check '+(writing.checks.includes(id)?'is-checked':'')+'" data-writing-check="'+id+'" aria-pressed="'+writing.checks.includes(id)+'"><span class="spirit-checkmark">'+(writing.checks.includes(id)?'✓':'□')+'</span><span>'+label+'</span></button>').join('')+'</div><span class="spirit-progress">'+writing.checks.length+' OF 4 COMPLETE</span><button type="button" class="spirit-back checklist-skip" id="writingSkip">SKIP CHECKLIST</button><label class="help-dismiss"><input type="checkbox" id="writingNever"> Don&#39;t show this checklist again</label></section>';
+  wireChecklistNavigation('writing',writingHideKey,openWriting,()=>{writingSkip=true;writingShowChecklist=false;openWriting();});
+  message.querySelectorAll('[data-writing-check]').forEach(b=>b.onclick=()=>{const id=b.dataset.writingCheck;writing.checks=writing.checks.includes(id)?writing.checks.filter(x=>x!==id):[...writing.checks,id];writingSave();openWriting();});
+ }else{
+  message.innerHTML='<section class="spirit-panel"><span class="spirit-step">STEP 2 OF 2</span><strong class="spirit-heading">DID THE GHOST WRITE IN THE BOOK?</strong><small>Only actual writing in the book confirms Ghost Writing evidence.</small><div class="spirit-answers"><button type="button" id="writingYes" class="'+(writing.answer==='yes'?'selected':'')+'">YES</button><button type="button" id="writingNo" class="'+(writing.answer==='no'?'selected':'')+'">NO</button></div><p class="spirit-result">'+(writing.answer==='yes'?'GHOST WRITING CONFIRMED.':writing.answer==='no'?'No writing observed. Ghost Writing is NOT ruled out. Leave the book in the activity area and check again.':'Choose what you observed.')+'</p><button type="button" class="spirit-back" id="writingBack">BACK TO CHECKLIST</button></section>';
+  document.getElementById('writingYes').onclick=()=>{writing.answer='yes';writingSave();writingSync();openWriting();};
+  document.getElementById('writingNo').onclick=()=>{writing.answer='no';writingSave();writingSync();openWriting();};
+  document.getElementById('writingBack').onclick=()=>{writingSkip=false;writingShowChecklist=true;writing.checks=writing.checks.filter(x=>x!=='wait');writingSave();openWriting();};
+ }
+}
+writingSync();
+
 uvSync();
 
 update();
 document.querySelectorAll('.equipment').forEach(button=>button.addEventListener('click',()=>{
 button.classList.add('pressed');setTimeout(()=>button.classList.remove('pressed'),150);
-if(button.dataset.id==='emf')openEmf();else if(button.dataset.id==='temperature')openTemp();else if(button.dataset.id==='uv')openUv();else if(button.dataset.id==='spirit')openSpirit();else if(button.dataset.id==='orbs')openOrbs();else if(button.dataset.id==='dots')openDots();else show(names[button.dataset.id],'This is the visual dashboard prototype. The equipment control is pressable; its observation questions will be connected after we approve the design.');
+if(button.dataset.id==='emf')openEmf();else if(button.dataset.id==='temperature')openTemp();else if(button.dataset.id==='uv')openUv();else if(button.dataset.id==='spirit')openSpirit();else if(button.dataset.id==='orbs')openOrbs();else if(button.dataset.id==='dots')openDots();else if(button.dataset.id==='writing')openWriting();else show(names[button.dataset.id],'This is the visual dashboard prototype. The equipment control is pressable; its observation questions will be connected after we approve the design.');
 }));
 document.querySelectorAll('.nav-key').forEach(b=>b.addEventListener('click',()=>{if(b.dataset.page!=='home')show(b.textContent.trim(),'This navigation control is ready for its future screen. The original investigation prototype remains available unchanged.');}));
 document.getElementById('notesBtn').addEventListener('click',()=>show('Notes','The original Notes and observation log are preserved in the existing investigation prototype. We will connect them to this device design later.'));
 function openMenu(){
  title.textContent='Ghost Intel Menu';actions.hidden=false;drawer.hidden=false;
- message.innerHTML='<span class="menu-info">Manage your current investigation. This does not remove the app or original prototype.</span><button type="button" class="menu-clear" id="menuClear">CLEAR ALL INVESTIGATION DATA</button><span class="menu-confirm" id="menuConfirm" hidden><strong>Reset the entire investigation?</strong><span>All EMF readings, UV observations, evidence highlights, thermometer, Spirit Box, Ghost Orbs and D.O.T.S. observations and active countdown will be cleared. This cannot be undone.</span><span class="menu-confirm-actions"><button type="button" id="menuClearYes">YES, RESET ALL</button><button type="button" id="menuClearNo">CANCEL</button></span></span>';
+ message.innerHTML='<span class="menu-info">Manage your current investigation. This does not remove the app or original prototype.</span><button type="button" class="menu-clear" id="menuClear">CLEAR ALL INVESTIGATION DATA</button><span class="menu-confirm" id="menuConfirm" hidden><strong>Reset the entire investigation?</strong><span>All EMF readings, UV observations, evidence highlights, thermometer, Spirit Box, Ghost Orbs, D.O.T.S. and Ghost Writing observations and active countdown will be cleared. This cannot be undone.</span><span class="menu-confirm-actions"><button type="button" id="menuClearYes">YES, RESET ALL</button><button type="button" id="menuClearNo">CANCEL</button></span></span>';
  const confirm=document.getElementById('menuConfirm');
  document.getElementById('menuClear').onclick=()=>{confirm.hidden=false;document.getElementById('menuClearYes').focus();};
  document.getElementById('menuClearNo').onclick=()=>{confirm.hidden=true;document.getElementById('menuClear').focus();};
  document.getElementById('menuClearYes').onclick=()=>{
-  entries=[];temp={phase:'placement',started:0,confirmed:false,checks:[]};uvEntries=[];spirit={checks:[],answer:''};orbs={checks:[],answer:''};spiritSkip=false;spiritShowChecklist=false;orbsSkip=false;orbsShowChecklist=false;dots={checks:[],answer:''};dotsSkip=false;dotsShowChecklist=false;
+  entries=[];temp={phase:'placement',started:0,confirmed:false,checks:[]};uvEntries=[];spirit={checks:[],answer:''};orbs={checks:[],answer:''};spiritSkip=false;spiritShowChecklist=false;orbsSkip=false;orbsShowChecklist=false;dots={checks:[],answer:''};dotsSkip=false;dotsShowChecklist=false;writing={checks:[],answer:''};writingSkip=false;writingShowChecklist=false;
   try{[...Array(localStorage.length)].map((_,i)=>localStorage.key(i)).filter(k=>k&&k.startsWith('ghost-intel-')).forEach(k=>localStorage.removeItem(k));}catch(e){}
-  update();tempTick();uvSync();spiritSync();orbsSync();dotsSync();confirm.hidden=true;
-  message.innerHTML='<span class="menu-success">Investigation data cleared. EMF, Temperature, UV, Spirit Box, Ghost Orbs and D.O.T.S. are ready for a fresh investigation.</span><button type="button" class="menu-clear-done" id="menuDone">RETURN TO DASHBOARD</button>';
+  update();tempTick();uvSync();spiritSync();orbsSync();dotsSync();writingSync();confirm.hidden=true;
+  message.innerHTML='<span class="menu-success">Investigation data cleared. EMF, Temperature, UV, Spirit Box, Ghost Orbs, D.O.T.S. and Ghost Writing are ready for a fresh investigation.</span><button type="button" class="menu-clear-done" id="menuDone">RETURN TO DASHBOARD</button>';
   document.getElementById('menuDone').onclick=hide;
  };
  document.getElementById('closeDrawer').focus();
