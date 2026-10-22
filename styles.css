@@ -312,3 +312,25 @@
  color:#e8fff0;font:900 20px/1 system-ui;box-shadow:0 0 0 3px #10191ce8,0 2px 7px #000a;
  clip-path:none;pointer-events:none;z-index:3;
 }
+
+
+/* ===== UNIFIED NOTES + GHOST LIST ===== */
+.intel-panel{display:flex;flex-direction:column;gap:13px;font:500 13px/1.45 system-ui;color:#d9e8ee}
+.intel-hint{color:#a9bfca;font:500 11px/1.5 system-ui;margin:0}
+.intel-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+.intel-ghost{min-width:0;min-height:48px;padding:5px 2px;border:1px solid #c3a153;border-radius:8px;background:#4b4128;color:#ffe4a0;font:700 clamp(10px,2.8vw,13px) system-ui;overflow-wrap:anywhere}
+.intel-ghost.red{background:#50272e;border-color:#c86773;color:#ffd1d5}
+.intel-ghost.green{background:#244c39;border-color:#6eb88b;color:#d6f6df}
+.intel-detail{border:1px solid #526c76;border-radius:11px;background:#253943;padding:13px;color:#e1eef3}
+.intel-detail[hidden]{display:none}
+.intel-detail p{margin:9px 0;color:#d2e3e9;font:500 12px/1.5 system-ui}
+.intel-detail small{color:#a9c1cb}
+.intel-tabs{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.intel-tabs button{min-height:44px;border:1px solid #526875;border-radius:8px;background:#25343c;color:#b9cdd6;font:800 12px system-ui}
+.intel-tabs button.active{background:#385762;border-color:#95b8c8;color:#fff}
+.intel-history{display:flex;flex-direction:column;gap:8px}
+.intel-note{display:flex;flex-direction:column;align-items:stretch;text-align:left;gap:5px;padding:12px;border:1px solid #506673;border-radius:9px;background:#24343d;color:#e8f1f5;font:600 13px system-ui}
+.intel-note small{color:#a9c0ca;font:500 11px system-ui}
+.intel-note-reason{margin-top:6px;padding-top:9px;border-top:1px solid #536c77;color:#c8dce4;font:500 12px/1.55 system-ui}
+.intel-note-reason[hidden]{display:none}
+.intel-stuck{min-height:50px;border:1px solid #b9c5c9;border-radius:11px;background:#d9e3e6;color:#14232a;font:900 15px system-ui}
