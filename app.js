@@ -181,21 +181,24 @@ const dotsKey='ghost-intel-dots-v1';
 let dots={checks:[],answer:''};
 try{const saved=JSON.parse(localStorage.getItem(dotsKey)||'null');if(saved&&Array.isArray(saved.checks))dots={checks:saved.checks.filter(x=>['place','area','view','watch'].includes(x)),answer:['yes','no',''].includes(saved.answer)?saved.answer:''};}catch(e){}
 let dotsSkip=false;
+let dotsShowChecklist=false;
+const dotsHideKey='ghost-intel-dots-hide-checklist';
 const dotsItems=[['place','D.O.T.S. Projector is placed and turned on'],['area',"Projector covers the ghost's activity area"],['view','I can clearly see the projected dots'],['watch',"I've watched for the ghost to pass through"]];
 function dotsSave(){try{localStorage.setItem(dotsKey,JSON.stringify(dots));}catch(e){}}
 function dotsSync(){const tile=document.querySelector('[data-id="dots"]');if(tile)tile.classList.toggle('evidence-confirmed',dots.answer==='yes');}
 function openDots(){
  title.textContent='D.O.T.S. Projector';actions.hidden=true;drawer.hidden=false;message.className='';
- const done=dotsItems.every(([id])=>dots.checks.includes(id))||dotsSkip;
+ const done=dotsItems.every(([id])=>dots.checks.includes(id))||dotsSkip||(!dotsShowChecklist&&localStorage.getItem(dotsHideKey)==='true');
  if(!done){
-  message.innerHTML='<section class="spirit-panel"><span class="spirit-step">STEP 1 OF 2</span><strong class="spirit-heading">SET UP D.O.T.S.</strong><small>Check each step as you complete it. Finish all four to continue, or skip below.</small><div class="spirit-checks">'+dotsItems.map(([id,label])=>'<button type="button" class="spirit-check '+(dots.checks.includes(id)?'is-checked':'')+'" data-dots-check="'+id+'" aria-pressed="'+dots.checks.includes(id)+'"><span class="spirit-checkmark">'+(dots.checks.includes(id)?'✓':'□')+'</span><span>'+label+'</span></button>').join('')+'</div><span class="spirit-progress">'+dots.checks.length+' OF 4 COMPLETE</span><button type="button" class="spirit-back checklist-skip" id="dotsSkip">SKIP CHECKLIST</button></section>';
+  message.innerHTML='<section class="spirit-panel"><span class="spirit-step">STEP 1 OF 2</span><strong class="spirit-heading">SET UP D.O.T.S.</strong><small>Check each step as you complete it. Finish all four to continue, or skip below.</small><div class="spirit-checks">'+dotsItems.map(([id,label])=>'<button type="button" class="spirit-check '+(dots.checks.includes(id)?'is-checked':'')+'" data-dots-check="'+id+'" aria-pressed="'+dots.checks.includes(id)+'"><span class="spirit-checkmark">'+(dots.checks.includes(id)?'✓':'□')+'</span><span>'+label+'</span></button>').join('')+'</div><span class="spirit-progress">'+dots.checks.length+' OF 4 COMPLETE</span><button type="button" class="spirit-back checklist-skip" id="dotsSkip">SKIP CHECKLIST</button><button type="button" class="spirit-back" id="dotsNever">DON'T SHOW AGAIN</button></section>';
   document.getElementById('dotsSkip').onclick=()=>{dotsSkip=true;openDots();};
+  document.getElementById('dotsNever').onclick=()=>{try{localStorage.setItem(dotsHideKey,'true');}catch(e){}dotsSkip=true;dotsShowChecklist=false;openDots();};
   message.querySelectorAll('[data-dots-check]').forEach(b=>b.onclick=()=>{const id=b.dataset.dotsCheck;dots.checks=dots.checks.includes(id)?dots.checks.filter(x=>x!==id):[...dots.checks,id];dotsSave();openDots();});
  }else{
   message.innerHTML='<section class="spirit-panel"><span class="spirit-step">STEP 2 OF 2</span><strong class="spirit-heading">DID YOU SEE A GHOST SILHOUETTE?</strong><small>Look for a ghost-shaped figure briefly passing through the projected dots.</small><div class="spirit-answers"><button type="button" id="dotsYes" class="'+(dots.answer==='yes'?'selected':'')+'">YES</button><button type="button" id="dotsNo" class="'+(dots.answer==='no'?'selected':'')+'">NO</button></div><p class="spirit-result">'+(dots.answer==='yes'?'D.O.T.S. EVIDENCE CONFIRMED.':dots.answer==='no'?'D.O.T.S. is NOT ruled out. Try repositioning the projector or watching longer. Goryo D.O.T.S. is visible through a video camera only when nobody is in the room.':'Choose what you observed.')+'</p><button type="button" class="spirit-back" id="dotsBack">BACK TO CHECKLIST</button></section>';
   document.getElementById('dotsYes').onclick=()=>{dots.answer='yes';dotsSave();dotsSync();openDots();};
   document.getElementById('dotsNo').onclick=()=>{dots.answer='no';dotsSave();dotsSync();openDots();};
-  document.getElementById('dotsBack').onclick=()=>{dotsSkip=false;dots.checks=dots.checks.filter(x=>x!=='watch');dotsSave();openDots();};
+  document.getElementById('dotsBack').onclick=()=>{dotsSkip=false;dotsShowChecklist=true;dots.checks=dots.checks.filter(x=>x!=='watch');dotsSave();openDots();};
  }
 }
 dotsSync();
@@ -216,7 +219,7 @@ function openMenu(){
  document.getElementById('menuClear').onclick=()=>{confirm.hidden=false;document.getElementById('menuClearYes').focus();};
  document.getElementById('menuClearNo').onclick=()=>{confirm.hidden=true;document.getElementById('menuClear').focus();};
  document.getElementById('menuClearYes').onclick=()=>{
-  entries=[];temp={phase:'placement',started:0,confirmed:false,checks:[]};uvEntries=[];spirit={checks:[],answer:''};orbs={checks:[],answer:''};spiritSkip=false;orbsSkip=false;dots={checks:[],answer:''};dotsSkip=false;
+  entries=[];temp={phase:'placement',started:0,confirmed:false,checks:[]};uvEntries=[];spirit={checks:[],answer:''};orbs={checks:[],answer:''};spiritSkip=false;orbsSkip=false;dots={checks:[],answer:''};dotsSkip=false;dotsShowChecklist=false;
   try{[...Array(localStorage.length)].map((_,i)=>localStorage.key(i)).filter(k=>k&&k.startsWith('ghost-intel-')).forEach(k=>localStorage.removeItem(k));}catch(e){}
   update();tempTick();uvSync();spiritSync();orbsSync();dotsSync();confirm.hidden=true;
   message.innerHTML='<span class="menu-success">Investigation data cleared. EMF, Temperature, UV, Spirit Box, Ghost Orbs and D.O.T.S. are ready for a fresh investigation.</span><button type="button" class="menu-clear-done" id="menuDone">RETURN TO DASHBOARD</button>';
