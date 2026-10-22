@@ -177,26 +177,49 @@ function openOrbs(){
 }
 orbsSync();
 
+const dotsKey='ghost-intel-dots-v1';
+let dots={checks:[],answer:''};
+try{const saved=JSON.parse(localStorage.getItem(dotsKey)||'null');if(saved&&Array.isArray(saved.checks))dots={checks:saved.checks.filter(x=>['place','area','view','watch'].includes(x)),answer:['yes','no',''].includes(saved.answer)?saved.answer:''};}catch(e){}
+let dotsSkip=false;
+const dotsItems=[['place','D.O.T.S. Projector is placed and turned on'],['area',"Projector covers the ghost's activity area"],['view','I can clearly see the projected dots'],['watch',"I've watched for the ghost to pass through"]];
+function dotsSave(){try{localStorage.setItem(dotsKey,JSON.stringify(dots));}catch(e){}}
+function dotsSync(){const tile=document.querySelector('[data-id="dots"]');if(tile)tile.classList.toggle('evidence-confirmed',dots.answer==='yes');}
+function openDots(){
+ title.textContent='D.O.T.S. Projector';actions.hidden=true;drawer.hidden=false;message.className='';
+ const done=dotsItems.every(([id])=>dots.checks.includes(id))||dotsSkip;
+ if(!done){
+  message.innerHTML='<section class="spirit-panel"><span class="spirit-step">STEP 1 OF 2</span><strong class="spirit-heading">SET UP D.O.T.S.</strong><small>Check each step as you complete it. Finish all four to continue, or skip below.</small><div class="spirit-checks">'+dotsItems.map(([id,label])=>'<button type="button" class="spirit-check '+(dots.checks.includes(id)?'is-checked':'')+'" data-dots-check="'+id+'" aria-pressed="'+dots.checks.includes(id)+'"><span class="spirit-checkmark">'+(dots.checks.includes(id)?'✓':'□')+'</span><span>'+label+'</span></button>').join('')+'</div><span class="spirit-progress">'+dots.checks.length+' OF 4 COMPLETE</span><button type="button" class="spirit-back checklist-skip" id="dotsSkip">SKIP CHECKLIST</button></section>';
+  document.getElementById('dotsSkip').onclick=()=>{dotsSkip=true;openDots();};
+  message.querySelectorAll('[data-dots-check]').forEach(b=>b.onclick=()=>{const id=b.dataset.dotsCheck;dots.checks=dots.checks.includes(id)?dots.checks.filter(x=>x!==id):[...dots.checks,id];dotsSave();openDots();});
+ }else{
+  message.innerHTML='<section class="spirit-panel"><span class="spirit-step">STEP 2 OF 2</span><strong class="spirit-heading">DID YOU SEE A GHOST SILHOUETTE?</strong><small>Look for a ghost-shaped figure briefly passing through the projected dots.</small><div class="spirit-answers"><button type="button" id="dotsYes" class="'+(dots.answer==='yes'?'selected':'')+'">YES</button><button type="button" id="dotsNo" class="'+(dots.answer==='no'?'selected':'')+'">NO</button></div><p class="spirit-result">'+(dots.answer==='yes'?'D.O.T.S. EVIDENCE CONFIRMED.':dots.answer==='no'?'D.O.T.S. is NOT ruled out. Try repositioning the projector or watching longer. Goryo D.O.T.S. is visible through a video camera only when nobody is in the room.':'Choose what you observed.')+'</p><button type="button" class="spirit-back" id="dotsBack">BACK TO CHECKLIST</button></section>';
+  document.getElementById('dotsYes').onclick=()=>{dots.answer='yes';dotsSave();dotsSync();openDots();};
+  document.getElementById('dotsNo').onclick=()=>{dots.answer='no';dotsSave();dotsSync();openDots();};
+  document.getElementById('dotsBack').onclick=()=>{dotsSkip=false;dots.checks=dots.checks.filter(x=>x!=='watch');dotsSave();openDots();};
+ }
+}
+dotsSync();
+
 uvSync();
 
 update();
 document.querySelectorAll('.equipment').forEach(button=>button.addEventListener('click',()=>{
 button.classList.add('pressed');setTimeout(()=>button.classList.remove('pressed'),150);
-if(button.dataset.id==='emf')openEmf();else if(button.dataset.id==='temperature')openTemp();else if(button.dataset.id==='uv')openUv();else if(button.dataset.id==='spirit')openSpirit();else if(button.dataset.id==='orbs')openOrbs();else show(names[button.dataset.id],'This is the visual dashboard prototype. The equipment control is pressable; its observation questions will be connected after we approve the design.');
+if(button.dataset.id==='emf')openEmf();else if(button.dataset.id==='temperature')openTemp();else if(button.dataset.id==='uv')openUv();else if(button.dataset.id==='spirit')openSpirit();else if(button.dataset.id==='orbs')openOrbs();else if(button.dataset.id==='dots')openDots();else show(names[button.dataset.id],'This is the visual dashboard prototype. The equipment control is pressable; its observation questions will be connected after we approve the design.');
 }));
 document.querySelectorAll('.nav-key').forEach(b=>b.addEventListener('click',()=>{if(b.dataset.page!=='home')show(b.textContent.trim(),'This navigation control is ready for its future screen. The original investigation prototype remains available unchanged.');}));
 document.getElementById('notesBtn').addEventListener('click',()=>show('Notes','The original Notes and observation log are preserved in the existing investigation prototype. We will connect them to this device design later.'));
 function openMenu(){
  title.textContent='Ghost Intel Menu';actions.hidden=false;drawer.hidden=false;
- message.innerHTML='<span class="menu-info">Manage your current investigation. This does not remove the app or original prototype.</span><button type="button" class="menu-clear" id="menuClear">CLEAR ALL INVESTIGATION DATA</button><span class="menu-confirm" id="menuConfirm" hidden><strong>Reset the entire investigation?</strong><span>All EMF readings, UV observations, evidence highlights, thermometer observations and active countdown will be cleared. This cannot be undone.</span><span class="menu-confirm-actions"><button type="button" id="menuClearYes">YES, RESET ALL</button><button type="button" id="menuClearNo">CANCEL</button></span></span>';
+ message.innerHTML='<span class="menu-info">Manage your current investigation. This does not remove the app or original prototype.</span><button type="button" class="menu-clear" id="menuClear">CLEAR ALL INVESTIGATION DATA</button><span class="menu-confirm" id="menuConfirm" hidden><strong>Reset the entire investigation?</strong><span>All EMF readings, UV observations, evidence highlights, thermometer, Spirit Box, Ghost Orbs and D.O.T.S. observations and active countdown will be cleared. This cannot be undone.</span><span class="menu-confirm-actions"><button type="button" id="menuClearYes">YES, RESET ALL</button><button type="button" id="menuClearNo">CANCEL</button></span></span>';
  const confirm=document.getElementById('menuConfirm');
  document.getElementById('menuClear').onclick=()=>{confirm.hidden=false;document.getElementById('menuClearYes').focus();};
  document.getElementById('menuClearNo').onclick=()=>{confirm.hidden=true;document.getElementById('menuClear').focus();};
  document.getElementById('menuClearYes').onclick=()=>{
-  entries=[];temp={phase:'placement',started:0,confirmed:false,checks:[]};uvEntries=[];spirit={checks:[],answer:''};orbs={checks:[],answer:''};spiritSkip=false;orbsSkip=false;
+  entries=[];temp={phase:'placement',started:0,confirmed:false,checks:[]};uvEntries=[];spirit={checks:[],answer:''};orbs={checks:[],answer:''};spiritSkip=false;orbsSkip=false;dots={checks:[],answer:''};dotsSkip=false;
   try{[...Array(localStorage.length)].map((_,i)=>localStorage.key(i)).filter(k=>k&&k.startsWith('ghost-intel-')).forEach(k=>localStorage.removeItem(k));}catch(e){}
-  update();tempTick();uvSync();spiritSync();orbsSync();confirm.hidden=true;
-  message.innerHTML='<span class="menu-success">Investigation data cleared. EMF, Temperature, UV, Spirit Box and Ghost Orbs are ready for a fresh investigation.</span><button type="button" class="menu-clear-done" id="menuDone">RETURN TO DASHBOARD</button>';
+  update();tempTick();uvSync();spiritSync();orbsSync();dotsSync();confirm.hidden=true;
+  message.innerHTML='<span class="menu-success">Investigation data cleared. EMF, Temperature, UV, Spirit Box, Ghost Orbs and D.O.T.S. are ready for a fresh investigation.</span><button type="button" class="menu-clear-done" id="menuDone">RETURN TO DASHBOARD</button>';
   document.getElementById('menuDone').onclick=hide;
  };
  document.getElementById('closeDrawer').focus();
