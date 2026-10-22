@@ -127,12 +127,35 @@ function openUv(){
  document.getElementById('uvInfo').onclick=()=>{const el=document.getElementById('uvDetails');el.textContent='Assuming each qualifying interaction independently has a 25% chance of no UV for an Obake, this is the chance of no UV across all recorded interactions. It is NOT the probability the ghost is an Obake. A UV observation confirms UV evidence. Salt and uncertain observations do not count toward this calculation.';el.hidden=!el.hidden;};
 }
 
+
+const spiritKey='ghost-intel-spirit-v1';
+let spirit={checks:[],answer:''};
+try{const saved=JSON.parse(localStorage.getItem(spiritKey)||'null');if(saved&&Array.isArray(saved.checks))spirit={checks:saved.checks.filter(x=>['lights','near','on','asked'].includes(x)),answer:['yes','no',''].includes(saved.answer)?saved.answer:''};}catch(e){}
+const spiritItems=[['lights','Room lights are turned off'],['near',"I'm close to the ghost's location"],['on','Spirit Box is turned on'],['asked',"I've asked the ghost a question"]];
+function spiritSave(){try{localStorage.setItem(spiritKey,JSON.stringify(spirit));}catch(e){}}
+function spiritSync(){const tile=document.querySelector('[data-id="spirit"]');if(tile)tile.classList.toggle('evidence-confirmed',spirit.answer==='yes');}
+function openSpirit(){
+ title.textContent='Spirit Box';actions.hidden=true;drawer.hidden=false;message.className='';
+ const done=spiritItems.every(([id])=>spirit.checks.includes(id));
+ if(!done){
+  message.innerHTML='<section class="spirit-panel"><span class="spirit-step">STEP 1 OF 2</span><strong class="spirit-heading">PREPARE YOUR SPIRIT BOX</strong><small>Check each item as you complete it.</small><div class="spirit-checks">'+spiritItems.map(([id,label])=>'<button type="button" class="spirit-check '+(spirit.checks.includes(id)?'is-checked':'')+'" data-spirit-check="'+id+'" aria-pressed="'+spirit.checks.includes(id)+'"><span class="spirit-checkmark">'+(spirit.checks.includes(id)?'✓':'□')+'</span><span>'+label+'</span></button>').join('')+'</div><span class="spirit-progress">'+spirit.checks.length+' OF 4 COMPLETE</span><small>Some ghosts respond only when you are alone. Try that if needed.</small></section>';
+  message.querySelectorAll('[data-spirit-check]').forEach(b=>b.onclick=()=>{const id=b.dataset.spiritCheck;spirit.checks=spirit.checks.includes(id)?spirit.checks.filter(x=>x!==id):[...spirit.checks,id];spiritSave();openSpirit();});
+ }else{
+  message.innerHTML='<section class="spirit-panel"><span class="spirit-step">STEP 2 OF 2</span><strong class="spirit-heading">DID THE GHOST SPEAK?</strong><small>Only an actual voice response through the Spirit Box confirms evidence.</small><div class="spirit-answers"><button type="button" id="spiritYes" class="'+(spirit.answer==='yes'?'selected':'')+'">SPOKE</button><button type="button" id="spiritNo" class="'+(spirit.answer==='no'?'selected':'')+'">NO ANSWER</button></div><p class="spirit-result">'+(spirit.answer==='yes'?'SPIRIT BOX CONFIRMED':spirit.answer==='no'?'No response recorded. Spirit Box is NOT ruled out. Try being alone, moving closer, or asking again.':'Choose what happened after you asked.')+'</p><button type="button" class="spirit-back" id="spiritBack">BACK TO CHECKLIST</button>'+(spirit.answer==='no'?'<button type="button" class="spirit-back" id="spiritRetry">TRY AGAIN</button>':'')+'</section>';
+  document.getElementById('spiritYes').onclick=()=>{spirit.answer='yes';spiritSave();spiritSync();openSpirit();};
+  document.getElementById('spiritNo').onclick=()=>{spirit.answer='no';spiritSave();spiritSync();openSpirit();};
+  document.getElementById('spiritBack').onclick=()=>{spirit.checks=spirit.checks.filter(x=>x!=='asked');spiritSave();openSpirit();};
+  const retry=document.getElementById('spiritRetry');if(retry)retry.onclick=()=>{spirit.checks=spirit.checks.filter(x=>x!=='asked');spirit.answer='';spiritSave();openSpirit();};
+ }
+}
+spiritSync();
+
 uvSync();
 
 update();
 document.querySelectorAll('.equipment').forEach(button=>button.addEventListener('click',()=>{
 button.classList.add('pressed');setTimeout(()=>button.classList.remove('pressed'),150);
-if(button.dataset.id==='emf')openEmf();else if(button.dataset.id==='temperature')openTemp();else if(button.dataset.id==='uv')openUv();else show(names[button.dataset.id],'This is the visual dashboard prototype. The equipment control is pressable; its observation questions will be connected after we approve the design.');
+if(button.dataset.id==='emf')openEmf();else if(button.dataset.id==='temperature')openTemp();else if(button.dataset.id==='uv')openUv();else if(button.dataset.id==='spirit')openSpirit();else show(names[button.dataset.id],'This is the visual dashboard prototype. The equipment control is pressable; its observation questions will be connected after we approve the design.');
 }));
 document.querySelectorAll('.nav-key').forEach(b=>b.addEventListener('click',()=>{if(b.dataset.page!=='home')show(b.textContent.trim(),'This navigation control is ready for its future screen. The original investigation prototype remains available unchanged.');}));
 document.getElementById('notesBtn').addEventListener('click',()=>show('Notes','The original Notes and observation log are preserved in the existing investigation prototype. We will connect them to this device design later.'));
@@ -143,10 +166,10 @@ function openMenu(){
  document.getElementById('menuClear').onclick=()=>{confirm.hidden=false;document.getElementById('menuClearYes').focus();};
  document.getElementById('menuClearNo').onclick=()=>{confirm.hidden=true;document.getElementById('menuClear').focus();};
  document.getElementById('menuClearYes').onclick=()=>{
-  entries=[];temp={phase:'placement',started:0,confirmed:false,checks:[]};uvEntries=[];
+  entries=[];temp={phase:'placement',started:0,confirmed:false,checks:[]};uvEntries=[];spirit={checks:[],answer:''};
   try{[...Array(localStorage.length)].map((_,i)=>localStorage.key(i)).filter(k=>k&&k.startsWith('ghost-intel-')).forEach(k=>localStorage.removeItem(k));}catch(e){}
-  update();tempTick();uvSync();confirm.hidden=true;
-  message.innerHTML='<span class="menu-success">Investigation data cleared. EMF, Temperature and UV are ready for a fresh investigation.</span><button type="button" class="menu-clear-done" id="menuDone">RETURN TO DASHBOARD</button>';
+  update();tempTick();uvSync();spiritSync();confirm.hidden=true;
+  message.innerHTML='<span class="menu-success">Investigation data cleared. EMF, Temperature, UV and Spirit Box are ready for a fresh investigation.</span><button type="button" class="menu-clear-done" id="menuDone">RETURN TO DASHBOARD</button>';
   document.getElementById('menuDone').onclick=hide;
  };
  document.getElementById('closeDrawer').focus();
