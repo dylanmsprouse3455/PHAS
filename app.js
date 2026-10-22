@@ -93,24 +93,59 @@ document.getElementById('tempBanner').addEventListener('click',openTemp);
 setInterval(tempTick,1000);
 tempTick();
 
+
+const uvKey='ghost-intel-uv-v1';let uvEntries=[];
+try{const saved=JSON.parse(localStorage.getItem(uvKey)||'[]');if(Array.isArray(saved))uvEntries=saved;}catch(e){}
+let uvDraft=null;
+function uvSave(){try{localStorage.setItem(uvKey,JSON.stringify(uvEntries));}catch(e){}}
+function uvSync(){const tile=document.querySelector('[data-id="uv"]');if(tile){const found=uvEntries.some(e=>e.result==='yes');tile.classList.toggle('evidence-confirmed',found);tile.setAttribute('aria-label',found?'UV evidence confirmed':'UV and Footprints');}}
+function uvRecord(result,unusual='not-asked'){
+ uvEntries.push({type:uvDraft.type,result,unusual,time:new Date().toISOString()});uvSave();uvSync();uvStep('done');
+}
+function uvStep(step){
+ title.textContent='UV / Fingerprints';actions.hidden=true;drawer.hidden=false;
+ const controls=(items)=>'<span class="uv-options">'+items.map(([label,value])=>'<button type="button" data-uv="'+value+'">'+label+'</button>').join('')+'</span>';
+ if(step==='type'){
+  uvDraft={type:null};
+  message.innerHTML='<span class="uv-title">WHAT DID THE GHOST INTERACT WITH?</span>'+controls([['DOOR / WINDOW','door'],['LIGHT SWITCH','switch'],['SALT FOOTPRINT','salt'],['OTHER / UNSURE','other']])+'<span class="uv-hint">Choose the interaction you checked with a UV light.</span>';
+  message.querySelectorAll('[data-uv]').forEach(b=>b.onclick=()=>{uvDraft.type=b.dataset.uv;uvStep('result');});
+ }else if(step==='result'){
+  message.innerHTML='<span class="uv-title">DID YOU FIND A UV MARK?</span>'+controls([['YES — UV FOUND','yes'],['NO UV FOUND','no'],['NOT SURE / SKIP','unsure']])+'<span class="uv-hint">A missing UV mark does not rule out UV evidence. Check promptly after the interaction.</span><button class="uv-back" id="uvBack">BACK</button>';
+  message.querySelectorAll('[data-uv]').forEach(b=>b.onclick=()=>{uvDraft.result=b.dataset.uv;if(uvDraft.result==='yes')uvStep('unusual');else uvRecord(uvDraft.result);});
+  document.getElementById('uvBack').onclick=()=>uvStep('type');
+ }else if(step==='unusual'){
+  message.innerHTML='<span class="uv-title">ANYTHING UNUSUAL ABOUT THE PRINT?</span>'+controls([['SIX-FINGER HANDPRINT','six'],['UNUSUALLY FAST FADE','fade'],['LOOKED NORMAL','normal'],['NOT SURE / SKIP','unsure']])+'<span class="uv-hint">An unusual print may suggest Obake, but is not conclusive. Footprints are not handprints.</span>';
+  message.querySelectorAll('[data-uv]').forEach(b=>b.onclick=()=>uvRecord('yes',b.dataset.uv));
+ }else{
+  const last=uvEntries[uvEntries.length-1],found=uvEntries.some(e=>e.result==='yes');
+  const clue=last&&last.unusual==='six'&&last.type!=='salt'?'Possible Obake clue: six-finger handprint.':last&&last.unusual==='fade'?'Possible Obake clue: unusually short-lived UV mark.':'';
+  message.innerHTML='<span class="uv-title">'+(last?.result==='yes'?'UV EVIDENCE RECORDED':'OBSERVATION SAVED')+'</span><span class="uv-hint">'+(found?'UV evidence has been observed.':'No UV confirmed yet; absence is not elimination.')+'</span>'+(clue?'<span class="uv-clue">'+clue+'</span>':'')+'<span class="uv-hint">'+uvEntries.length+' UV observation(s) recorded this investigation.</span><button class="uv-primary" id="uvAgain">CHECK ANOTHER INTERACTION</button><button class="uv-back" id="uvDone">BACK TO DEVICE</button>';
+  document.getElementById('uvAgain').onclick=()=>uvStep('type');
+  document.getElementById('uvDone').onclick=hide;
+ }
+ document.getElementById('closeDrawer').focus();
+}
+function openUv(){uvStep('type');}
+uvSync();
+
 update();
 document.querySelectorAll('.equipment').forEach(button=>button.addEventListener('click',()=>{
 button.classList.add('pressed');setTimeout(()=>button.classList.remove('pressed'),150);
-if(button.dataset.id==='emf')openEmf();else if(button.dataset.id==='temperature')openTemp();else show(names[button.dataset.id],'This is the visual dashboard prototype. The equipment control is pressable; its observation questions will be connected after we approve the design.');
+if(button.dataset.id==='emf')openEmf();else if(button.dataset.id==='temperature')openTemp();else if(button.dataset.id==='uv')openUv();else show(names[button.dataset.id],'This is the visual dashboard prototype. The equipment control is pressable; its observation questions will be connected after we approve the design.');
 }));
 document.querySelectorAll('.nav-key').forEach(b=>b.addEventListener('click',()=>{if(b.dataset.page!=='home')show(b.textContent.trim(),'This navigation control is ready for its future screen. The original investigation prototype remains available unchanged.');}));
 document.getElementById('notesBtn').addEventListener('click',()=>show('Notes','The original Notes and observation log are preserved in the existing investigation prototype. We will connect them to this device design later.'));
 function openMenu(){
  title.textContent='Ghost Intel Menu';actions.hidden=false;drawer.hidden=false;
- message.innerHTML='<span class="menu-info">Manage your current investigation. This does not remove the app or original prototype.</span><button type="button" class="menu-clear" id="menuClear">CLEAR ALL INVESTIGATION DATA</button><span class="menu-confirm" id="menuConfirm" hidden><strong>Reset the entire investigation?</strong><span>All EMF readings, evidence highlights, thermometer observations and active countdown will be cleared. This cannot be undone.</span><span class="menu-confirm-actions"><button type="button" id="menuClearYes">YES, RESET ALL</button><button type="button" id="menuClearNo">CANCEL</button></span></span>';
+ message.innerHTML='<span class="menu-info">Manage your current investigation. This does not remove the app or original prototype.</span><button type="button" class="menu-clear" id="menuClear">CLEAR ALL INVESTIGATION DATA</button><span class="menu-confirm" id="menuConfirm" hidden><strong>Reset the entire investigation?</strong><span>All EMF readings, UV observations, evidence highlights, thermometer observations and active countdown will be cleared. This cannot be undone.</span><span class="menu-confirm-actions"><button type="button" id="menuClearYes">YES, RESET ALL</button><button type="button" id="menuClearNo">CANCEL</button></span></span>';
  const confirm=document.getElementById('menuConfirm');
  document.getElementById('menuClear').onclick=()=>{confirm.hidden=false;document.getElementById('menuClearYes').focus();};
  document.getElementById('menuClearNo').onclick=()=>{confirm.hidden=true;document.getElementById('menuClear').focus();};
  document.getElementById('menuClearYes').onclick=()=>{
-  entries=[];temp={phase:'placement',started:0,confirmed:false,checks:[]};
+  entries=[];temp={phase:'placement',started:0,confirmed:false,checks:[]};uvEntries=[];uvDraft=null;
   try{[...Array(localStorage.length)].map((_,i)=>localStorage.key(i)).filter(k=>k&&k.startsWith('ghost-intel-')).forEach(k=>localStorage.removeItem(k));}catch(e){}
-  update();tempTick();confirm.hidden=true;
-  message.innerHTML='<span class="menu-success">Investigation data cleared. EMF and Temperature are ready for a fresh investigation.</span><button type="button" class="menu-clear-done" id="menuDone">RETURN TO DASHBOARD</button>';
+  update();tempTick();uvSync();confirm.hidden=true;
+  message.innerHTML='<span class="menu-success">Investigation data cleared. EMF, Temperature and UV are ready for a fresh investigation.</span><button type="button" class="menu-clear-done" id="menuDone">RETURN TO DASHBOARD</button>';
   document.getElementById('menuDone').onclick=hide;
  };
  document.getElementById('closeDrawer').focus();
