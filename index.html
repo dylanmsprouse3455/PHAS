@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0a0c10"><title>Ghost Intel — Device Dashboard</title><link rel="stylesheet" href="styles.css"></head>
+<body><main class="device" aria-label="Ghost Intel device dashboard">
+<header class="device-header"><button class="small-key" id="menuBtn" aria-label="Open menu"><span class="menu-icon">☰</span><span>MENU</span></button><div class="nameplate"><strong>GHOST INTEL</strong><small>INVESTIGATION ASSISTANT</small></div><button class="small-key" id="notesBtn" aria-label="Notes"><span class="menu-icon">▤</span><span>NOTES</span></button></header>
+<section class="control-grid" aria-label="Observation equipment">
+<button class="equipment" data-id="emf" aria-label="EMF Activity"><img src="assets/emf.webp" alt="" draggable="false"></button>
+<button class="equipment" data-id="temperature" aria-label="Temperature"><img src="assets/temperature.webp" alt="" draggable="false"></button>
+<button class="equipment" data-id="uv" aria-label="UV and Footprints"><img src="assets/uv.webp" alt="" draggable="false"></button>
+<button class="equipment" data-id="orbs" aria-label="Ghost Orbs"><img src="assets/orbs.webp" alt="" draggable="false"></button>
+<button class="equipment" data-id="spirit" aria-label="Spirit Box"><img src="assets/spirit.webp" alt="" draggable="false"></button>
+<button class="equipment" data-id="dots" aria-label="D.O.T.S. Projector"><img src="assets/dots.webp" alt="" draggable="false"></button>
+<button class="equipment" data-id="writing" aria-label="Ghost Writing"><img src="assets/writing.webp" alt="" draggable="false"></button>
+<button class="equipment" data-id="salt" aria-label="Salt and Interaction"><img src="assets/salt.webp" alt="" draggable="false"></button>
+</section>
+<nav class="device-nav" aria-label="Device navigation"><button class="nav-key active" data-page="home"><span class="nav-symbol">⌂</span><span>HOME</span></button><button class="nav-key" data-page="ghosts"><span class="nav-symbol">▤</span><span>GHOST LIST</span></button><button class="nav-key" data-page="log"><span class="nav-symbol">▥</span><span>LOG</span></button><button class="nav-key" data-page="settings"><span class="nav-symbol">⚙</span><span>SETTINGS</span></button></nav>
+<div class="speaker" aria-hidden="true"></div><div class="corner c1"></div><div class="corner c2"></div><div class="corner c3"></div><div class="corner c4"></div>
+</main>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<div class="drawer" id="drawer" hidden><div class="drawer-card"><div class="drawer-head"><strong id="drawerTitle">Ghost Intel</strong><button id="closeDrawer" aria-label="Close">×</button></div><p id="drawerMessage"></p><div class="drawer-actions"><a href="investigation-original.html">Open original investigation prototype</a><button id="dismissDrawer">Back to device</button></div></div></div>
+<script src="app.js"></script></body></html>
