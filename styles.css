@@ -197,3 +197,7 @@
 .uv-mini button{border:1px solid #678da0;background:#253d4b;color:#d9f3ff;border-radius:50%;width:27px;height:27px}
 .uv-disclaimer[hidden]{display:none}
 @media(max-height:720px){.drawer:has(.uv-title) .drawer-card{padding:9px}.drawer:has(.uv-title) #drawerMessage{gap:5px}.drawer:has(.uv-title) .uv-options button{min-height:43px}.drawer:has(.uv-title) .uv-stats{padding:6px}}
+
+.uv-stats-heading{display:flex;justify-content:space-between;align-items:center;gap:8px;color:#bde9ff;font:800 12px system-ui;letter-spacing:.7px}
+.uv-stats-heading button{width:29px;height:29px;border:1px solid #638fa3;border-radius:50%;background:#243b47;color:#d6f2ff;font:700 17px system-ui}
+.uv-next{display:block;padding:8px 6px;color:#d9f6ff;font:700 13px/1.4 system-ui}
