@@ -292,8 +292,54 @@ document.querySelectorAll('.equipment').forEach(button=>button.addEventListener(
 button.classList.add('pressed');setTimeout(()=>button.classList.remove('pressed'),150);
 if(button.dataset.id==='emf')openEmf();else if(button.dataset.id==='temperature')openTemp();else if(button.dataset.id==='uv')openUv();else if(button.dataset.id==='spirit')openSpirit();else if(button.dataset.id==='orbs')openOrbs();else if(button.dataset.id==='dots')openDots();else if(button.dataset.id==='writing')openWriting();else if(button.dataset.id==='salt'){saltStage='salt';openSalt();}else show(names[button.dataset.id],'This is the visual dashboard prototype. The equipment control is pressable; its observation questions will be connected after we approve the design.');
 }));
-document.querySelectorAll('.nav-key').forEach(b=>b.addEventListener('click',()=>{if(b.dataset.page!=='home')show(b.textContent.trim(),'This navigation control is ready for its future screen. The original investigation prototype remains available unchanged.');}));
-document.getElementById('notesBtn').addEventListener('click',()=>show('Notes','The original Notes and observation log are preserved in the existing investigation prototype. We will connect them to this device design later.'));
+
+ // ===== UNIFIED INVESTIGATION: NOTES + GHOST LIST (PHASE ONE) =====
+const ghostRoster=['Spirit','Wraith','Phantom','Poltergeist','Banshee','Jinn','Mare','Revenant','Shade','Demon','Yurei','Oni','Yokai','Hantu','Goryo','Myling','Onryo','The Twins','Raiju','Obake','The Mimic','Moroi','Deogen','Thaye'];
+function investigationSnapshot(){
+ const notes=[];
+ const add=(source,label,reason,important,time,links)=>notes.push({source,label,reason,important,time:time||'',links:links||[source]});
+ entries.forEach((e,i)=>add('EMF','EMF Level '+e.level,e.level===5?'EMF Level 5 confirmed as journal evidence.':'Lower EMF readings are not EMF 5 evidence.',e.level===5,e.time||'', ['EMF']));
+ if(temp.confirmed)add('Temperature','Freezing temperatures confirmed','Freezing temperatures count as journal evidence.',true,'',['Temperature']);
+ uvEntries.forEach(e=>add('UV',e.result==='yes'?'UV evidence found':e.result==='no'?'No UV found after interaction':'UV observation uncertain',e.result==='yes'?'UV journal evidence confirmed.':e.valid?'A prompt check on a UV-capable surface found no UV. This does not definitively exclude UV.':'This observation does not qualify for the Obake fingerprint-failure counter.',e.result==='yes',e.time,['UV']));
+ [['Spirit Box',spirit],['Ghost Orbs',orbs],['D.O.T.S.',dots],['Ghost Writing',writing]].forEach(([name,state])=>{if(state.answer)add(name,state.answer==='yes'?name+' confirmed':name+' not observed',state.answer==='yes'?'Confirmed journal evidence.':'Not observed is not proof of absence.',state.answer==='yes','',[name]);});
+ saltHistory.forEach(e=>add('Salt','Salt: '+(e.salt==='yes'?'stepped in':e.salt==='no'?'not disturbed':'uncertain')+(e.uv==='found'?' · UV footprints found':e.uv==='not seen'?' · UV footprints not seen':''),e.salt==='yes'?'Confirmed salt step contradicts Wraith behavior. Salt UV footprints do not confirm journal UV evidence.':'No definitive ghost exclusion from this salt observation.',e.salt==='yes',e.time,['Salt','UV']));
+ notes.sort((a,b)=>a.time&&b.time?a.time.localeCompare(b.time):a.time?-1:b.time?1:0);
+ return notes;
+}
+function safeText(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function ghostAssessment(name){
+ const stepped=saltHistory.some(e=>e.salt==='yes');
+ if(name==='Wraith'&&stepped)return {status:'red',label:'RULED OUT',reason:'A confirmed ghost step in salt contradicts standard Wraith behavior.',source:'Salt & Interaction'};
+ return {status:'yellow',label:'POSSIBLE',reason:'No definitive contradiction has been established by the current limited reasoning rules. This does not guarantee evidence compatibility.',source:'Investigation'};
+}
+function openGhostList(){
+ title.textContent='Ghost List';actions.hidden=true;drawer.hidden=false;message.className='';
+ const statuses=ghostRoster.map(name=>({name,...ghostAssessment(name)}));
+ message.innerHTML='<section class="intel-panel"><p class="intel-hint">Tap a ghost to see its reasoning. Yellow means not yet ruled out; full evidence compatibility rules are still being developed.</p><div class="intel-grid">'+statuses.map((g,i)=>'<button type="button" class="intel-ghost '+g.status+'" data-ghost="'+i+'">'+safeText(g.name)+'</button>').join('')+'</div><div id="intelGhostDetail" class="intel-detail" hidden></div></section>';
+ const detail=document.getElementById('intelGhostDetail');
+ message.querySelectorAll('[data-ghost]').forEach(b=>b.onclick=()=>{
+  const g=statuses[Number(b.dataset.ghost)];
+  if(!detail.hidden&&detail.dataset.name===g.name){detail.hidden=true;return;}
+  detail.dataset.name=g.name;detail.hidden=false;
+  detail.innerHTML='<strong>'+safeText(g.name)+' — '+g.label+'</strong><p>'+safeText(g.reason)+'</p><small>Source: '+safeText(g.source)+'</small>';
+ });
+}
+function openNotes(all=false,expanded=-1){
+ title.textContent='Investigation Notes';actions.hidden=true;drawer.hidden=false;message.className='';
+ const notes=investigationSnapshot(),shown=all?notes:notes.filter(n=>n.important);
+ message.innerHTML='<section class="intel-panel"><div class="intel-tabs"><button type="button" id="intelImportant" '+(!all?'class="active"':'')+'>IMPORTANT</button><button type="button" id="intelAll" '+(all?'class="active"':'')+'>ALL HISTORY</button></div><small class="intel-hint">'+shown.length+' observation'+(shown.length===1?'':'s')+' shown. Existing equipment history is read without changing it.</small><div class="intel-history">'+(shown.length?shown.map((n,i)=>'<button type="button" class="intel-note" data-note="'+i+'"><strong>'+safeText(n.label)+'</strong><small>'+safeText(n.source)+(n.time?' · '+safeText(new Date(n.time).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})):'')+'</small><span class="intel-note-reason" '+(expanded===i?'':'hidden')+'>'+safeText(n.reason)+'<br>Linked: '+safeText(n.links.join(', '))+'</span></button>').join(''):'<p>No observations in this view yet.</p>')+'</div><button type="button" id="intelStuck" class="intel-stuck">I&#39;M STUCK</button><div id="intelAdvice" class="intel-detail" hidden></div></section>';
+ document.getElementById('intelImportant').onclick=()=>openNotes(false);
+ document.getElementById('intelAll').onclick=()=>openNotes(true);
+ message.querySelectorAll('[data-note]').forEach(b=>b.onclick=()=>{const d=b.querySelector('.intel-note-reason');d.hidden=!d.hidden;message.querySelectorAll('.intel-note-reason').forEach(other=>{if(other!==d)other.hidden=true;});});
+ document.getElementById('intelStuck').onclick=()=>{
+  const advice=document.getElementById('intelAdvice');advice.hidden=false;
+  const wraith=ghostAssessment('Wraith');
+  const confirmed=notes.filter(n=>n.reason.includes('journal evidence')&&n.important).map(n=>n.label);
+  advice.innerHTML='<strong>ONE-TIME INVESTIGATION REVIEW</strong><p><b>Known:</b> '+safeText(confirmed.length?confirmed.join('; '):'No journal evidence confirmed in this snapshot.')+'</p><p><b>Behavior:</b> '+safeText(wraith.status==='red'?'Wraith contradicted by confirmed salt step.':'No definitive Wraith salt contradiction recorded.')+'</p><p><b>Next:</b> Investigate a missing journal evidence type and seek a distinctive ghost behavior. A lack of response alone does not rule out evidence.</p><small>Read-only snapshot. No observations or ghost statuses changed.</small>';
+ };
+}
+document.querySelectorAll('.nav-key').forEach(b=>b.addEventListener('click',()=>{if(b.dataset.page==='ghosts')openGhostList();else if(b.dataset.page==='log')openNotes();else if(b.dataset.page!=='home')show(b.textContent.trim(),'Settings will be available in a future update.');}));
+document.getElementById('notesBtn').addEventListener('click',()=>openNotes());
 function openMenu(){
  title.textContent='Ghost Intel Menu';actions.hidden=false;drawer.hidden=false;
  message.innerHTML='<span class="menu-info">Manage your current investigation. This does not remove the app or original prototype.</span><button type="button" class="menu-clear" id="menuClear">CLEAR ALL INVESTIGATION DATA</button><span class="menu-confirm" id="menuConfirm" hidden><strong>Reset the entire investigation?</strong><span>All EMF readings, UV observations, evidence highlights, thermometer, Spirit Box, Ghost Orbs, D.O.T.S. and Ghost Writing and Salt observations and active countdown will be cleared. This cannot be undone.</span><span class="menu-confirm-actions"><button type="button" id="menuClearYes">YES, RESET ALL</button><button type="button" id="menuClearNo">CANCEL</button></span></span>';
