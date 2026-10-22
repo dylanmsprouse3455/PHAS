@@ -258,3 +258,22 @@
 .drawer:has(#drawerMessage.uv-surface-choice) .uv-surface-grid{grid-template-columns:1fr 1fr;gap:10px}
 .drawer:has(#drawerMessage.uv-surface-choice) .uv-surface-grid button{min-height:62px;font-size:12px}
 .drawer:has(#drawerMessage.uv-surface-choice) #uvChoiceBack,.drawer:has(#drawerMessage.uv-surface-choice) #uvChoiceClose{min-height:44px;border:1px solid #6d96a9;border-radius:8px;background:#284b5e;color:#f0faff;font:800 12px system-ui}
+
+/* Spirit Box: compact two-step checklist */
+.spirit-panel{display:flex;flex-direction:column;gap:12px;color:#dce8ed;font-family:system-ui,sans-serif}
+.spirit-step{color:#91b9ce;font-size:10px;letter-spacing:2px;font-weight:800}
+.spirit-heading{font-size:17px;letter-spacing:.8px;color:#eaf5fa}
+.spirit-panel small{font-size:11px;line-height:1.4;color:#a8bbc5}
+.spirit-checks{display:flex;flex-direction:column;gap:8px}
+.spirit-check{display:flex;align-items:center;text-align:left;gap:12px;min-height:49px;padding:9px 12px;border:1px solid #536b78;border-radius:9px;background:#26343d;color:#e0e9ef;font:600 12px system-ui}
+.spirit-check.is-checked{background:#23463a;border-color:#69ad86}
+.spirit-checkmark{font-size:22px;color:#a9c3d0;min-width:23px}
+.spirit-check.is-checked .spirit-checkmark{color:#8ee5a8}
+.spirit-progress{font:800 11px system-ui;letter-spacing:1px;color:#9bd4b5;text-align:center}
+.spirit-answers{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.spirit-answers button{min-height:75px;border-radius:10px;border:1px solid #7395a5;background:#253c47;color:#f1f8fa;font:800 15px system-ui}
+.spirit-answers button.selected{background:#24583c;border-color:#9bdfaf}
+#spiritNo.selected{background:#58492d;border-color:#e1c37e}
+.spirit-result{min-height:44px;font:600 12px/1.45 system-ui;color:#b9d1dc;text-align:center;margin:0}
+.spirit-back{min-height:40px;border-radius:8px;border:1px solid #607987;background:#253a45;color:#dcebf2;font:700 11px system-ui}
+.drawer:has(.spirit-panel) .drawer-card{max-height:calc(100dvh - 75px);overflow:auto}
