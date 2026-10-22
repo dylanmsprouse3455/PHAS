@@ -277,3 +277,9 @@
 .spirit-result{min-height:44px;font:600 12px/1.45 system-ui;color:#b9d1dc;text-align:center;margin:0}
 .spirit-back{min-height:40px;border-radius:8px;border:1px solid #607987;background:#253a45;color:#dcebf2;font:700 11px system-ui}
 .drawer:has(.spirit-panel) .drawer-card{max-height:calc(100dvh - 75px);overflow:auto}
+
+.checklist-help{gap:14px}
+.checklist-help p{margin:0;color:#bdced8;font:12px/1.55 system-ui}
+.help-dismiss{display:flex;align-items:center;gap:9px;color:#e1edf3;font:600 13px system-ui}
+.help-dismiss input{width:19px;height:19px;accent-color:#78c6a0}
+.checklist-help .spirit-back{min-height:48px}
