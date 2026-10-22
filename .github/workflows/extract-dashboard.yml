@@ -1,0 +1,32 @@
+name: Extract Ghost Intel dashboard
+on:
+  push:
+    branches: [main]
+    paths:
+      - ghost-intel-device-dashboard.zip
+      - .github/workflows/extract-dashboard.yml
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  extract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - name: Unpack dashboard into site root
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/ghost-intel-unpacked
+          unzip -q ghost-intel-device-dashboard.zip -d /tmp/ghost-intel-unpacked
+          test -f /tmp/ghost-intel-unpacked/ghost-intel-device/index.html
+          test -f /tmp/ghost-intel-unpacked/ghost-intel-device/investigation-original.html
+          cp -R /tmp/ghost-intel-unpacked/ghost-intel-device/. ./
+          touch .nojekyll
+          git add index.html styles.css app.js assets investigation-original.html .nojekyll
+          if ! git diff --cached --quiet; then
+            git -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" commit -m "Extract Ghost Intel dashboard for GitHub Pages"
+            git push
+          fi
