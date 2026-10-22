@@ -244,3 +244,10 @@
 .uv-counter .uv-live-found{min-height:43px}
 .uv-counter-details:not([hidden]){display:block;color:#bcd0dc;font:11px/1.35 system-ui}
 @media(max-height:710px){.uv-counter{gap:6px}.uv-counter-controls button{width:45px;height:45px}.uv-probability{padding:8px;gap:4px}.uv-counter .uv-live-result{padding:8px}}
+
+.uv-surface-choice{display:flex;flex-direction:column;gap:7px;padding:9px;border:1px solid #75a3b8;border-radius:9px;background:#203440;color:#e6f5fc;font:12px system-ui}
+.uv-surface-choice strong{font:800 13px system-ui}
+.uv-surface-choice small{font:11px/1.3 system-ui;color:#bdd1dc}
+.uv-surface-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.uv-surface-grid button,.uv-surface-choice>button{min-height:38px;padding:6px;border:1px solid #729cb1;border-radius:7px;background:#284b5e;color:#edf9ff;font:700 11px system-ui}
+.uv-surface-grid button:last-child{background:#383b3e;border-color:#7b8389}
