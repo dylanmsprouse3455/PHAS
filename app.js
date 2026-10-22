@@ -136,6 +136,7 @@ function spiritSave(){try{localStorage.setItem(spiritKey,JSON.stringify(spirit))
 function spiritSync(){const tile=document.querySelector('[data-id="spirit"]');if(tile)tile.classList.toggle('evidence-confirmed',spirit.answer==='yes');}
 function openSpirit(){
  title.textContent='Spirit Box';actions.hidden=true;drawer.hidden=false;message.className='';
+ if(showChecklistHelp('spirit',openSpirit))return;
  const done=spiritItems.every(([id])=>spirit.checks.includes(id));
  if(!done){
   message.innerHTML='<section class="spirit-panel"><span class="spirit-step">STEP 1 OF 2</span><strong class="spirit-heading">PREPARE YOUR SPIRIT BOX</strong><small>Check each item as you complete it.</small><div class="spirit-checks">'+spiritItems.map(([id,label])=>'<button type="button" class="spirit-check '+(spirit.checks.includes(id)?'is-checked':'')+'" data-spirit-check="'+id+'" aria-pressed="'+spirit.checks.includes(id)+'"><span class="spirit-checkmark">'+(spirit.checks.includes(id)?'✓':'□')+'</span><span>'+label+'</span></button>').join('')+'</div><span class="spirit-progress">'+spirit.checks.length+' OF 4 COMPLETE</span><small>Some ghosts respond only when you are alone. Try that if needed.</small></section>';
@@ -150,12 +151,43 @@ function openSpirit(){
 }
 spiritSync();
 
+const orbsKey='ghost-intel-orbs-v1';
+let orbs={checks:[],answer:''};
+try{const saved=JSON.parse(localStorage.getItem(orbsKey)||'null');if(saved&&Array.isArray(saved.checks))orbs={checks:saved.checks.filter(x=>['camera','night','lights','aim'].includes(x)),answer:['yes','no',''].includes(saved.answer)?saved.answer:''};}catch(e){}
+const orbsItems=[['camera','Video camera is turned on'],['night','Night vision is enabled'],['lights','Room lights are off'],['aim',"Camera is aimed at the ghost's room"]];
+function orbsSave(){try{localStorage.setItem(orbsKey,JSON.stringify(orbs));}catch(e){}}
+function orbsSync(){const tile=document.querySelector('[data-id="orbs"]');if(tile)tile.classList.toggle('evidence-confirmed',orbs.answer==='yes');}
+function openOrbs(){
+ title.textContent='Video Camera / Ghost Orbs';actions.hidden=true;drawer.hidden=false;message.className='';
+ if(showChecklistHelp('orbs',openOrbs))return;
+ const done=orbsItems.every(([id])=>orbs.checks.includes(id));
+ if(!done){
+  message.innerHTML='<section class="spirit-panel"><span class="spirit-step">STEP 1 OF 2</span><strong class="spirit-heading">SET UP YOUR CAMERA</strong><small>Check each item as you complete it.</small><div class="spirit-checks">'+orbsItems.map(([id,label])=>'<button type="button" class="spirit-check '+(orbs.checks.includes(id)?'is-checked':'')+'" data-orbs-check="'+id+'" aria-pressed="'+orbs.checks.includes(id)+'"><span class="spirit-checkmark">'+(orbs.checks.includes(id)?'✓':'□')+'</span><span>'+label+'</span></button>').join('')+'</div><span class="spirit-progress">'+orbs.checks.length+' OF 4 COMPLETE</span></section>';
+  message.querySelectorAll('[data-orbs-check]').forEach(b=>b.onclick=()=>{const id=b.dataset.orbsCheck;orbs.checks=orbs.checks.includes(id)?orbs.checks.filter(x=>x!==id):[...orbs.checks,id];orbsSave();openOrbs();});
+ }else{
+  message.innerHTML='<section class="spirit-panel"><span class="spirit-step">STEP 2 OF 2</span><strong class="spirit-heading">DID YOU SEE GHOST ORBS?</strong><small>Look for floating orbs moving independently in the camera view. Snow or particles can be misleading.</small><div class="spirit-answers"><button type="button" id="orbsYes" class="'+(orbs.answer==='yes'?'selected':'')+'">YES</button><button type="button" id="orbsNo" class="'+(orbs.answer==='no'?'selected':'')+'">NO</button></div><p class="spirit-result">'+(orbs.answer==='yes'?'GHOST ORBS RECORDED. Remember: The Mimic can also show orbs.':orbs.answer==='no'?'No orb seen. Ghost Orbs are NOT ruled out. Try another angle or watch longer.':'Choose what you observed.')+'</p><button type="button" class="spirit-back" id="orbsBack">BACK TO CHECKLIST</button></section>';
+  document.getElementById('orbsYes').onclick=()=>{orbs.answer='yes';orbsSave();orbsSync();openOrbs();};
+  document.getElementById('orbsNo').onclick=()=>{orbs.answer='no';orbsSave();orbsSync();openOrbs();};
+  document.getElementById('orbsBack').onclick=()=>{orbs.checks=orbs.checks.filter(x=>x!=='aim');orbsSave();openOrbs();};
+ }
+}
+const checklistHelpSeen={};
+function showChecklistHelp(kind,continueTo){
+ const key='ghost-intel-'+kind+'-help-dismissed';
+ if(checklistHelpSeen[kind]||localStorage.getItem(key)==='true')return false;
+ title.textContent=kind==='spirit'?'Spirit Box — Instructions':'Video Camera — Instructions';
+ message.innerHTML='<section class="spirit-panel checklist-help"><strong class="spirit-heading">HOW TO USE THIS CHECKLIST</strong><p>Check off each step as you complete it in Phasmophobia. After the last check, Ghost Intel automatically asks Yes or No.</p><p><strong>NO</strong> means you did not observe evidence this time. It does not rule it out.</p><label class="help-dismiss"><input type="checkbox" id="helpSkip"> Don\'t show me again</label><button type="button" class="spirit-back" id="helpContinue">GOT IT</button></section>';
+ document.getElementById('helpContinue').onclick=()=>{checklistHelpSeen[kind]=true;if(document.getElementById('helpSkip').checked)try{localStorage.setItem(key,'true');}catch(e){}continueTo();};
+ return true;
+}
+orbsSync();
+
 uvSync();
 
 update();
 document.querySelectorAll('.equipment').forEach(button=>button.addEventListener('click',()=>{
 button.classList.add('pressed');setTimeout(()=>button.classList.remove('pressed'),150);
-if(button.dataset.id==='emf')openEmf();else if(button.dataset.id==='temperature')openTemp();else if(button.dataset.id==='uv')openUv();else if(button.dataset.id==='spirit')openSpirit();else show(names[button.dataset.id],'This is the visual dashboard prototype. The equipment control is pressable; its observation questions will be connected after we approve the design.');
+if(button.dataset.id==='emf')openEmf();else if(button.dataset.id==='temperature')openTemp();else if(button.dataset.id==='uv')openUv();else if(button.dataset.id==='spirit')openSpirit();else if(button.dataset.id==='orbs')openOrbs();else show(names[button.dataset.id],'This is the visual dashboard prototype. The equipment control is pressable; its observation questions will be connected after we approve the design.');
 }));
 document.querySelectorAll('.nav-key').forEach(b=>b.addEventListener('click',()=>{if(b.dataset.page!=='home')show(b.textContent.trim(),'This navigation control is ready for its future screen. The original investigation prototype remains available unchanged.');}));
 document.getElementById('notesBtn').addEventListener('click',()=>show('Notes','The original Notes and observation log are preserved in the existing investigation prototype. We will connect them to this device design later.'));
@@ -166,10 +198,10 @@ function openMenu(){
  document.getElementById('menuClear').onclick=()=>{confirm.hidden=false;document.getElementById('menuClearYes').focus();};
  document.getElementById('menuClearNo').onclick=()=>{confirm.hidden=true;document.getElementById('menuClear').focus();};
  document.getElementById('menuClearYes').onclick=()=>{
-  entries=[];temp={phase:'placement',started:0,confirmed:false,checks:[]};uvEntries=[];spirit={checks:[],answer:''};
+  entries=[];temp={phase:'placement',started:0,confirmed:false,checks:[]};uvEntries=[];spirit={checks:[],answer:''};orbs={checks:[],answer:''};
   try{[...Array(localStorage.length)].map((_,i)=>localStorage.key(i)).filter(k=>k&&k.startsWith('ghost-intel-')).forEach(k=>localStorage.removeItem(k));}catch(e){}
-  update();tempTick();uvSync();spiritSync();confirm.hidden=true;
-  message.innerHTML='<span class="menu-success">Investigation data cleared. EMF, Temperature, UV and Spirit Box are ready for a fresh investigation.</span><button type="button" class="menu-clear-done" id="menuDone">RETURN TO DASHBOARD</button>';
+  update();tempTick();uvSync();spiritSync();orbsSync();confirm.hidden=true;
+  message.innerHTML='<span class="menu-success">Investigation data cleared. EMF, Temperature, UV, Spirit Box and Ghost Orbs are ready for a fresh investigation.</span><button type="button" class="menu-clear-done" id="menuDone">RETURN TO DASHBOARD</button>';
   document.getElementById('menuDone').onclick=hide;
  };
  document.getElementById('closeDrawer').focus();
