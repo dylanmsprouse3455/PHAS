@@ -97,3 +97,13 @@
 .drawer:has(#emfChecks) .emf-clear-confirm:not([hidden]){position:absolute;z-index:5;inset:12px;display:flex;justify-content:center;align-items:stretch;text-align:center;gap:18px;padding:20px;background:linear-gradient(145deg,#3e262a,#17191e);border:2px solid #da7772;box-shadow:0 0 0 8px #0009,0 12px 30px #000c}
 .drawer:has(#emfChecks) .emf-clear-confirm:not([hidden]) strong{font-size:clamp(17px,3dvh,23px)}
 .drawer:has(#emfChecks) .emf-clear-confirm:not([hidden]) .emf-clear-actions{width:100%}
+
+
+/* Comfortable EMF placement: lower panel, roomier controls, still above Safari toolbar */
+.drawer:has(#emfChecks){align-items:center;padding-top:calc(env(safe-area-inset-top) + 90px);padding-bottom:calc(env(safe-area-inset-bottom) + 75px)}
+.drawer:has(#emfChecks) .drawer-card{transform:translateY(22px);max-height:calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 185px);padding:clamp(13px,2.5dvh,20px)}
+.drawer:has(#emfChecks) #drawerMessage{gap:clamp(8px,1.4dvh,14px)}
+.drawer:has(#emfChecks) .emf-level{min-height:clamp(58px,9dvh,84px);gap:7px}
+.drawer:has(#emfChecks) .emf-warning{padding:11px 12px;line-height:1.45}
+.drawer:has(#emfChecks) .emf-check{height:clamp(37px,5.5dvh,50px)}
+@media(max-height:760px){.drawer:has(#emfChecks){padding-top:calc(env(safe-area-inset-top) + 45px);padding-bottom:calc(env(safe-area-inset-bottom) + 65px)}.drawer:has(#emfChecks) .drawer-card{transform:translateY(10px);max-height:calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 120px)}.drawer:has(#emfChecks) #drawerMessage{gap:7px}.drawer:has(#emfChecks) .emf-warning{padding:7px 9px}}
