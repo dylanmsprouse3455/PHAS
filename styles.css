@@ -201,3 +201,22 @@
 .uv-stats-heading{display:flex;justify-content:space-between;align-items:center;gap:8px;color:#bde9ff;font:800 12px system-ui;letter-spacing:.7px}
 .uv-stats-heading button{width:29px;height:29px;border:1px solid #638fa3;border-radius:50%;background:#243b47;color:#d6f2ff;font:700 17px system-ui}
 .uv-next{display:block;padding:8px 6px;color:#d9f6ff;font:700 13px/1.4 system-ui}
+
+/* UV live checklist — isolated from other equipment */
+.drawer:has(.uv-live) .drawer-card{overflow:hidden;max-height:calc(100dvh - 95px);padding:clamp(10px,1.7dvh,17px)}
+.drawer:has(.uv-live) #drawerMessage{margin-top:8px;display:block}
+.uv-live{display:flex;flex-direction:column;gap:clamp(7px,1.1dvh,12px);font-family:system-ui;color:#e6f4fc}
+.uv-live>p{margin:0;font:12px/1.4 system-ui;color:#c1d3de}
+.uv-live-list{display:flex;flex-direction:column;gap:5px;max-height:min(31dvh,255px);overflow-y:auto;scrollbar-width:thin}
+.uv-live-row,.uv-live-found{display:flex;align-items:center;gap:10px;min-height:39px;padding:7px 10px;border:1px solid #526e7c;border-radius:8px;background:#202e38;font:600 12px system-ui}
+.uv-live-row input,.uv-live-found input{width:20px;height:20px;flex:none;accent-color:#7bd3f6}
+.uv-live-found{background:#1c392d;border-color:#5b9d76;color:#c9f9da;font-weight:800;min-height:43px}
+.uv-live-found input{accent-color:#66d897}
+.uv-live-result{display:flex;flex-direction:column;gap:5px;background:#1d303b;border:1px solid #557c8c;border-radius:9px;padding:11px}
+.uv-live-result strong{font:800 16px system-ui;color:#e9d4a3}
+.uv-live-result span{font:13px/1.4 system-ui}
+.uv-live-result small{font:12px/1.4 system-ui;color:#a9d9f0}
+.uv-live-footer{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.uv-live-footer button{min-height:38px;border:1px solid #60869a;border-radius:8px;background:#243e4d;color:#e2f3fa;font:700 12px system-ui}
+#uvDetails:not([hidden]){display:block;color:#bed0d9;font:11px/1.4 system-ui}
+@media(max-height:690px){.uv-live-list{max-height:24dvh}.uv-live-row{min-height:32px;padding:4px 8px}.uv-live{gap:6px}.uv-live-result{padding:8px}}
