@@ -131,3 +131,19 @@
 .temp-sync{height:15px}.temp-sync>span{width:0}
 #tempSyncText{font:700 14px system-ui;text-align:center;color:#8bdbfa}
 @media(max-height:680px){.drawer:has(.temp-heading) .drawer-card{padding:12px}.drawer:has(.temp-heading) #drawerMessage{gap:9px;margin-top:8px}.temp-options button{min-height:65px}}
+
+
+/* Main menu: investigation reset with explicit confirmation */
+.drawer:has(.menu-info),.drawer:has(.menu-success){padding:calc(env(safe-area-inset-top) + 18px) 12px calc(env(safe-area-inset-bottom) + 95px);align-items:center;overflow:hidden}
+.drawer:has(.menu-info) .drawer-card,.drawer:has(.menu-success) .drawer-card{width:min(100%,440px);max-height:calc(100dvh - 160px);overflow-y:auto;padding:22px}
+.drawer:has(.menu-info) #drawerMessage,.drawer:has(.menu-success) #drawerMessage{display:flex;flex-direction:column;gap:15px;margin-top:16px;font-family:system-ui}
+.menu-info,.menu-success{display:block;color:#c9d7de;font:14px/1.5 system-ui}
+.menu-success{color:#9ee5b9}
+.menu-clear,.menu-clear-done{width:100%;min-height:58px;border-radius:10px;border:2px solid #d78b84;background:linear-gradient(135deg,#7e272c,#421c21);color:#fff1ed;font:800 13px system-ui;letter-spacing:.5px;cursor:pointer}
+.menu-clear-done{background:#20543b;border-color:#77ce9a}
+.menu-confirm{display:flex;flex-direction:column;gap:12px;padding:14px;background:#301d20;border:1px solid #d18479;border-radius:10px;color:#f3e6e3;font:13px/1.5 system-ui}
+.menu-confirm[hidden]{display:none}
+.menu-confirm strong{font-size:16px}
+.menu-confirm-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.menu-confirm-actions button{min-height:50px;border:1px solid #b77e79;border-radius:8px;background:#4a3437;color:white;font:700 12px system-ui}
+.menu-confirm-actions button:first-child{background:#a52e31;border-color:#edaaa5}
