@@ -20,6 +20,7 @@ if(!el)return;
 const count=entries.filter(x=>x.eligible).length;
 el.textContent='Eligible interactions: '+count+'/7'+(count>=7?' — EMF 5 remains possible.':'');
 undo.disabled=!!active||entries.length===0;
+const clear=document.getElementById('emfClear');if(clear)clear.disabled=!active&&!entries.length;
 }
 function log(level){
 const now=Date.now();if(active||now-lastTap<650)return;lastTap=now;
@@ -30,10 +31,14 @@ syncActive();
 }
 function openEmf(){
 title.textContent='EMF Activity';actions.hidden=true;
-message.innerHTML='<span class="emf-prompt">What did you observe?</span><span class="emf-levels" role="group" aria-label="Observed EMF level">'+[1,2,3,4,5].map(n=>'<button type="button" class="emf-level emf-'+n+'" data-level="'+n+'" aria-label="Record EMF level '+n+'"><span class="emf-dot"></span><strong>'+n+'</strong></button>').join('')+'</span><span id="emfConfirmed" class="emf-confirmed" hidden>☑ EMF LEVEL 5 REACHED</span><span class="emf-warning"><strong>One reading at a time.</strong> Tap the observed level to start timing. Do not select another number while EMF is active. When the reading ends in-game, press the large STOP button.</span><span id="emfRunning" class="emf-running-panel" hidden><span class="emf-running-label">EMF READING ACTIVE — DO NOT TAP OTHER LEVELS</span><span class="emf-timer" id="emfTimer">00:00</span><button type="button" class="emf-stop" id="emfStop">■ STOP READING</button></span><span class="emf-status" id="emfStatus"></span><span class="emf-feedback" id="emfFeedback" role="status" aria-live="polite"></span><button type="button" class="emf-undo" id="emfUndo">Undo last reading</button>';
+message.innerHTML='<span class="emf-prompt">What did you observe?</span><span class="emf-levels" role="group" aria-label="Observed EMF level">'+[1,2,3,4,5].map(n=>'<button type="button" class="emf-level emf-'+n+'" data-level="'+n+'" aria-label="Record EMF level '+n+'"><span class="emf-dot"></span><strong>'+n+'</strong></button>').join('')+'</span><span id="emfConfirmed" class="emf-confirmed" hidden>☑ EMF LEVEL 5 REACHED</span><span class="emf-warning"><strong>One reading at a time.</strong> Tap the observed level to start timing. Do not select another number while EMF is active. When the reading ends in-game, press the large STOP button.</span><span id="emfRunning" class="emf-running-panel" hidden><span class="emf-running-label">EMF READING ACTIVE — DO NOT TAP OTHER LEVELS</span><span class="emf-timer" id="emfTimer">00:00</span><button type="button" class="emf-stop" id="emfStop">■ STOP READING</button></span><span class="emf-status" id="emfStatus"></span><span class="emf-feedback" id="emfFeedback" role="status" aria-live="polite"></span><button type="button" class="emf-undo" id="emfUndo">Undo last reading</button><button type="button" class="emf-clear" id="emfClear">CLEAR INTERACTIONS</button><span class="emf-clear-confirm" id="emfClearConfirm" hidden><strong>Clear all EMF readings and stop the active timer?</strong><span>This resets only EMF. Other equipment will not be affected.</span><span class="emf-clear-actions"><button type="button" id="emfClearYes">YES, CLEAR ALL</button><button type="button" id="emfClearNo">CANCEL</button></span></span>';
 drawer.hidden=false;update();syncActive();
 message.querySelectorAll('[data-level]').forEach(b=>b.addEventListener('click',()=>log(Number(b.dataset.level))));
 document.getElementById('emfStop').addEventListener('click',stopReading);
+const clearConfirm=document.getElementById('emfClearConfirm');
+document.getElementById('emfClear').addEventListener('click',()=>{clearConfirm.hidden=false;});
+document.getElementById('emfClearNo').addEventListener('click',()=>{clearConfirm.hidden=true;});
+document.getElementById('emfClearYes').addEventListener('click',()=>{entries=[];active=null;if(ticker){clearInterval(ticker);ticker=null;}try{localStorage.removeItem(key);localStorage.removeItem('ghost-intel-emf-active');}catch(e){}clearConfirm.hidden=true;update();syncActive();document.getElementById('emfFeedback').textContent='All EMF interactions cleared. Ready for a new investigation.';});
 document.getElementById('emfUndo').addEventListener('click',()=>{if(active)return;entries.pop();save();update();document.getElementById('emfFeedback').textContent='Last reading removed.';});
 document.getElementById('closeDrawer').focus();
 }
