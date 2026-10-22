@@ -35,3 +35,13 @@
 .emf-stop:active{transform:translateY(5px);box-shadow:inset 0 2px 6px #42080b}
 .emf-level:disabled{opacity:.36;filter:grayscale(.5);cursor:not-allowed}
 .emf-level.emf-running{opacity:1;filter:none;border-color:#f8f5c5;box-shadow:inset 0 0 12px #e6e9b13b,0 0 13px #fff3ad70}
+
+
+.emf-clear{display:block;width:100%;min-height:48px;margin-top:12px;border:2px solid #b96c64;border-radius:9px;background:linear-gradient(145deg,#4d2829,#26191b);color:#ffe5e0;font:800 14px system-ui;letter-spacing:.6px;cursor:pointer}
+.emf-clear:disabled{opacity:.4;cursor:not-allowed}
+.emf-clear-confirm{display:flex;flex-direction:column;gap:10px;margin-top:12px;padding:14px;border:1px solid #d18479;border-radius:10px;background:#301d20;font:13px/1.4 system-ui}
+.emf-clear-confirm[hidden]{display:none}
+.emf-clear-confirm strong{color:#ffe4df}.emf-clear-confirm span{color:#d5c9c7}
+.emf-clear-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.emf-clear-actions button{min-height:46px;border-radius:8px;border:1px solid #a96e67;background:#3e2b2d;color:white;font:700 12px system-ui}
+.emf-clear-actions button:first-child{background:#a52e31;border-color:#f1a5a0}
