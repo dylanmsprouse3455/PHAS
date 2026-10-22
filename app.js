@@ -128,55 +128,64 @@ function openUv(){
 }
 
 
+// ===== EQUIPMENT: SPIRIT BOX =====
 const spiritKey='ghost-intel-spirit-v1';
 let spirit={checks:[],answer:''};
 try{const saved=JSON.parse(localStorage.getItem(spiritKey)||'null');if(saved&&Array.isArray(saved.checks))spirit={checks:saved.checks.filter(x=>['lights','near','on','asked'].includes(x)),answer:['yes','no',''].includes(saved.answer)?saved.answer:''};}catch(e){}
 let spiritSkip=false;
+let spiritShowChecklist=false;
+const spiritHideKey='ghost-intel-spirit-hide-checklist';
 const spiritItems=[['lights','Room lights are turned off'],['near',"I'm close to the ghost's location"],['on','Spirit Box is turned on'],['asked',"I've asked the ghost a question"]];
 function spiritSave(){try{localStorage.setItem(spiritKey,JSON.stringify(spirit));}catch(e){}}
 function spiritSync(){const tile=document.querySelector('[data-id="spirit"]');if(tile)tile.classList.toggle('evidence-confirmed',spirit.answer==='yes');}
 function openSpirit(){
  title.textContent='Spirit Box';actions.hidden=true;drawer.hidden=false;message.className='';
 
- const done=spiritItems.every(([id])=>spirit.checks.includes(id))||spiritSkip;
+ const done=spiritItems.every(([id])=>spirit.checks.includes(id))||spiritSkip||(!spiritShowChecklist&&localStorage.getItem(spiritHideKey)==='true');
  if(!done){
-  message.innerHTML='<section class="spirit-panel"><span class="spirit-step">STEP 1 OF 2</span><strong class="spirit-heading">PREPARE YOUR SPIRIT BOX</strong><small>Check each item as you complete it.</small><div class="spirit-checks">'+spiritItems.map(([id,label])=>'<button type="button" class="spirit-check '+(spirit.checks.includes(id)?'is-checked':'')+'" data-spirit-check="'+id+'" aria-pressed="'+spirit.checks.includes(id)+'"><span class="spirit-checkmark">'+(spirit.checks.includes(id)?'✓':'□')+'</span><span>'+label+'</span></button>').join('')+'</div><span class="spirit-progress">'+spirit.checks.length+' OF 4 COMPLETE</span><small>Some ghosts respond only when you are alone. Try that if needed.</small><button type="button" class="spirit-back checklist-skip" id="spiritSkip">SKIP CHECKLIST</button></section>';
+  message.innerHTML='<section class="spirit-panel"><span class="spirit-step">STEP 1 OF 2</span><strong class="spirit-heading">PREPARE YOUR SPIRIT BOX</strong><small>Check each item as you complete it.</small><div class="spirit-checks">'+spiritItems.map(([id,label])=>'<button type="button" class="spirit-check '+(spirit.checks.includes(id)?'is-checked':'')+'" data-spirit-check="'+id+'" aria-pressed="'+spirit.checks.includes(id)+'"><span class="spirit-checkmark">'+(spirit.checks.includes(id)?'✓':'□')+'</span><span>'+label+'</span></button>').join('')+'</div><span class="spirit-progress">'+spirit.checks.length+' OF 4 COMPLETE</span><small>Some ghosts respond only when you are alone. Try that if needed.</small><button type="button" class="spirit-back checklist-skip" id="spiritSkip">SKIP CHECKLIST</button><button type="button" class="spirit-back" id="spiritNever">DON&#39;T SHOW AGAIN</button></section>';
   document.getElementById('spiritSkip').onclick=()=>{spiritSkip=true;openSpirit();};
+  document.getElementById('spiritNever').onclick=()=>{localStorage.setItem(spiritHideKey,'true');spiritSkip=true;spiritShowChecklist=false;openSpirit();};
   message.querySelectorAll('[data-spirit-check]').forEach(b=>b.onclick=()=>{const id=b.dataset.spiritCheck;spirit.checks=spirit.checks.includes(id)?spirit.checks.filter(x=>x!==id):[...spirit.checks,id];spiritSave();openSpirit();});
  }else{
   message.innerHTML='<section class="spirit-panel"><span class="spirit-step">STEP 2 OF 2</span><strong class="spirit-heading">DID THE GHOST SPEAK?</strong><small>Only an actual voice response through the Spirit Box confirms evidence.</small><div class="spirit-answers"><button type="button" id="spiritYes" class="'+(spirit.answer==='yes'?'selected':'')+'">SPOKE</button><button type="button" id="spiritNo" class="'+(spirit.answer==='no'?'selected':'')+'">NO ANSWER</button></div><p class="spirit-result">'+(spirit.answer==='yes'?'SPIRIT BOX CONFIRMED':spirit.answer==='no'?'No response recorded. Spirit Box is NOT ruled out. Try being alone, moving closer, or asking again.':'Choose what happened after you asked.')+'</p><button type="button" class="spirit-back" id="spiritBack">BACK TO CHECKLIST</button>'+(spirit.answer==='no'?'<button type="button" class="spirit-back" id="spiritRetry">TRY AGAIN</button>':'')+'</section>';
   document.getElementById('spiritYes').onclick=()=>{spirit.answer='yes';spiritSave();spiritSync();openSpirit();};
   document.getElementById('spiritNo').onclick=()=>{spirit.answer='no';spiritSave();spiritSync();openSpirit();};
-  document.getElementById('spiritBack').onclick=()=>{spiritSkip=false;spirit.checks=spirit.checks.filter(x=>x!=='asked');spiritSave();openSpirit();};
+  document.getElementById('spiritBack').onclick=()=>{spiritSkip=false;spiritShowChecklist=true;spirit.checks=spirit.checks.filter(x=>x!=='asked');spiritSave();openSpirit();};
   const retry=document.getElementById('spiritRetry');if(retry)retry.onclick=()=>{spirit.checks=spirit.checks.filter(x=>x!=='asked');spirit.answer='';spiritSave();openSpirit();};
  }
 }
 spiritSync();
 
+// ===== EQUIPMENT: GHOST ORBS =====
 const orbsKey='ghost-intel-orbs-v1';
 let orbs={checks:[],answer:''};
 try{const saved=JSON.parse(localStorage.getItem(orbsKey)||'null');if(saved&&Array.isArray(saved.checks))orbs={checks:saved.checks.filter(x=>['camera','night','lights','aim'].includes(x)),answer:['yes','no',''].includes(saved.answer)?saved.answer:''};}catch(e){}
 let orbsSkip=false;
+let orbsShowChecklist=false;
+const orbsHideKey='ghost-intel-orbs-hide-checklist';
 const orbsItems=[['camera','Video camera is turned on'],['night','Night vision is enabled'],['lights','Room lights are off'],['aim',"Camera is aimed at the ghost's room"]];
 function orbsSave(){try{localStorage.setItem(orbsKey,JSON.stringify(orbs));}catch(e){}}
 function orbsSync(){const tile=document.querySelector('[data-id="orbs"]');if(tile)tile.classList.toggle('evidence-confirmed',orbs.answer==='yes');}
 function openOrbs(){
  title.textContent='Video Camera / Ghost Orbs';actions.hidden=true;drawer.hidden=false;message.className='';
 
- const done=orbsItems.every(([id])=>orbs.checks.includes(id))||orbsSkip;
+ const done=orbsItems.every(([id])=>orbs.checks.includes(id))||orbsSkip||(!orbsShowChecklist&&localStorage.getItem(orbsHideKey)==='true');
  if(!done){
-  message.innerHTML='<section class="spirit-panel"><span class="spirit-step">STEP 1 OF 2</span><strong class="spirit-heading">SET UP YOUR CAMERA</strong><small>Check each item as you complete it.</small><div class="spirit-checks">'+orbsItems.map(([id,label])=>'<button type="button" class="spirit-check '+(orbs.checks.includes(id)?'is-checked':'')+'" data-orbs-check="'+id+'" aria-pressed="'+orbs.checks.includes(id)+'"><span class="spirit-checkmark">'+(orbs.checks.includes(id)?'✓':'□')+'</span><span>'+label+'</span></button>').join('')+'</div><span class="spirit-progress">'+orbs.checks.length+' OF 4 COMPLETE</span><button type="button" class="spirit-back checklist-skip" id="orbsSkip">SKIP CHECKLIST</button></section>';
+  message.innerHTML='<section class="spirit-panel"><span class="spirit-step">STEP 1 OF 2</span><strong class="spirit-heading">SET UP YOUR CAMERA</strong><small>Check each item as you complete it.</small><div class="spirit-checks">'+orbsItems.map(([id,label])=>'<button type="button" class="spirit-check '+(orbs.checks.includes(id)?'is-checked':'')+'" data-orbs-check="'+id+'" aria-pressed="'+orbs.checks.includes(id)+'"><span class="spirit-checkmark">'+(orbs.checks.includes(id)?'✓':'□')+'</span><span>'+label+'</span></button>').join('')+'</div><span class="spirit-progress">'+orbs.checks.length+' OF 4 COMPLETE</span><button type="button" class="spirit-back checklist-skip" id="orbsSkip">SKIP CHECKLIST</button><button type="button" class="spirit-back" id="orbsNever">DON&#39;T SHOW AGAIN</button></section>';
   document.getElementById('orbsSkip').onclick=()=>{orbsSkip=true;openOrbs();};
+  document.getElementById('orbsNever').onclick=()=>{localStorage.setItem(orbsHideKey,'true');orbsSkip=true;orbsShowChecklist=false;openOrbs();};
   message.querySelectorAll('[data-orbs-check]').forEach(b=>b.onclick=()=>{const id=b.dataset.orbsCheck;orbs.checks=orbs.checks.includes(id)?orbs.checks.filter(x=>x!==id):[...orbs.checks,id];orbsSave();openOrbs();});
  }else{
   message.innerHTML='<section class="spirit-panel"><span class="spirit-step">STEP 2 OF 2</span><strong class="spirit-heading">DID YOU SEE GHOST ORBS?</strong><small>Look for floating orbs moving independently in the camera view. Snow or particles can be misleading.</small><div class="spirit-answers"><button type="button" id="orbsYes" class="'+(orbs.answer==='yes'?'selected':'')+'">YES</button><button type="button" id="orbsNo" class="'+(orbs.answer==='no'?'selected':'')+'">NO</button></div><p class="spirit-result">'+(orbs.answer==='yes'?'GHOST ORBS RECORDED. Remember: The Mimic can also show orbs.':orbs.answer==='no'?'No orb seen. Ghost Orbs are NOT ruled out. Try another angle or watch longer.':'Choose what you observed.')+'</p><button type="button" class="spirit-back" id="orbsBack">BACK TO CHECKLIST</button></section>';
   document.getElementById('orbsYes').onclick=()=>{orbs.answer='yes';orbsSave();orbsSync();openOrbs();};
   document.getElementById('orbsNo').onclick=()=>{orbs.answer='no';orbsSave();orbsSync();openOrbs();};
-  document.getElementById('orbsBack').onclick=()=>{orbsSkip=false;orbs.checks=orbs.checks.filter(x=>x!=='aim');orbsSave();openOrbs();};
+  document.getElementById('orbsBack').onclick=()=>{orbsSkip=false;orbsShowChecklist=true;orbs.checks=orbs.checks.filter(x=>x!=='aim');orbsSave();openOrbs();};
  }
 }
 orbsSync();
 
+// ===== EQUIPMENT: D.O.T.S. =====
 const dotsKey='ghost-intel-dots-v1';
 let dots={checks:[],answer:''};
 try{const saved=JSON.parse(localStorage.getItem(dotsKey)||'null');if(saved&&Array.isArray(saved.checks))dots={checks:saved.checks.filter(x=>['place','area','view','watch'].includes(x)),answer:['yes','no',''].includes(saved.answer)?saved.answer:''};}catch(e){}
@@ -190,7 +199,7 @@ function openDots(){
  title.textContent='D.O.T.S. Projector';actions.hidden=true;drawer.hidden=false;message.className='';
  const done=dotsItems.every(([id])=>dots.checks.includes(id))||dotsSkip||(!dotsShowChecklist&&localStorage.getItem(dotsHideKey)==='true');
  if(!done){
-  message.innerHTML='<section class="spirit-panel"><span class="spirit-step">STEP 1 OF 2</span><strong class="spirit-heading">SET UP D.O.T.S.</strong><small>Check each step as you complete it. Finish all four to continue, or skip below.</small><div class="spirit-checks">'+dotsItems.map(([id,label])=>'<button type="button" class="spirit-check '+(dots.checks.includes(id)?'is-checked':'')+'" data-dots-check="'+id+'" aria-pressed="'+dots.checks.includes(id)+'"><span class="spirit-checkmark">'+(dots.checks.includes(id)?'✓':'□')+'</span><span>'+label+'</span></button>').join('')+'</div><span class="spirit-progress">'+dots.checks.length+' OF 4 COMPLETE</span><button type="button" class="spirit-back checklist-skip" id="dotsSkip">SKIP CHECKLIST</button><button type="button" class="spirit-back" id="dotsNever">DON'T SHOW AGAIN</button></section>';
+  message.innerHTML='<section class="spirit-panel"><span class="spirit-step">STEP 1 OF 2</span><strong class="spirit-heading">SET UP D.O.T.S.</strong><small>Check each step as you complete it. Finish all four to continue, or skip below.</small><div class="spirit-checks">'+dotsItems.map(([id,label])=>'<button type="button" class="spirit-check '+(dots.checks.includes(id)?'is-checked':'')+'" data-dots-check="'+id+'" aria-pressed="'+dots.checks.includes(id)+'"><span class="spirit-checkmark">'+(dots.checks.includes(id)?'✓':'□')+'</span><span>'+label+'</span></button>').join('')+'</div><span class="spirit-progress">'+dots.checks.length+' OF 4 COMPLETE</span><button type="button" class="spirit-back checklist-skip" id="dotsSkip">SKIP CHECKLIST</button><button type="button" class="spirit-back" id="dotsNever">DON&#39;T SHOW AGAIN</button></section>';
   document.getElementById('dotsSkip').onclick=()=>{dotsSkip=true;openDots();};
   document.getElementById('dotsNever').onclick=()=>{try{localStorage.setItem(dotsHideKey,'true');}catch(e){}dotsSkip=true;dotsShowChecklist=false;openDots();};
   message.querySelectorAll('[data-dots-check]').forEach(b=>b.onclick=()=>{const id=b.dataset.dotsCheck;dots.checks=dots.checks.includes(id)?dots.checks.filter(x=>x!==id):[...dots.checks,id];dotsSave();openDots();});
@@ -219,7 +228,7 @@ function openMenu(){
  document.getElementById('menuClear').onclick=()=>{confirm.hidden=false;document.getElementById('menuClearYes').focus();};
  document.getElementById('menuClearNo').onclick=()=>{confirm.hidden=true;document.getElementById('menuClear').focus();};
  document.getElementById('menuClearYes').onclick=()=>{
-  entries=[];temp={phase:'placement',started:0,confirmed:false,checks:[]};uvEntries=[];spirit={checks:[],answer:''};orbs={checks:[],answer:''};spiritSkip=false;orbsSkip=false;dots={checks:[],answer:''};dotsSkip=false;dotsShowChecklist=false;
+  entries=[];temp={phase:'placement',started:0,confirmed:false,checks:[]};uvEntries=[];spirit={checks:[],answer:''};orbs={checks:[],answer:''};spiritSkip=false;spiritShowChecklist=false;orbsSkip=false;orbsShowChecklist=false;dots={checks:[],answer:''};dotsSkip=false;dotsShowChecklist=false;
   try{[...Array(localStorage.length)].map((_,i)=>localStorage.key(i)).filter(k=>k&&k.startsWith('ghost-intel-')).forEach(k=>localStorage.removeItem(k));}catch(e){}
   update();tempTick();uvSync();spiritSync();orbsSync();dotsSync();confirm.hidden=true;
   message.innerHTML='<span class="menu-success">Investigation data cleared. EMF, Temperature, UV, Spirit Box, Ghost Orbs and D.O.T.S. are ready for a fresh investigation.</span><button type="button" class="menu-clear-done" id="menuDone">RETURN TO DASHBOARD</button>';
