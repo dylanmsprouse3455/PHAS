@@ -346,3 +346,92 @@
 #drawerMessage .intel-grid > button.intel-ghost:focus-visible{outline:3px solid #edf7ff!important;outline-offset:2px}
 .drawer:has(.intel-grid) .drawer-card{overflow-y:auto!important;max-height:calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 55px)!important}
 @media(max-width:360px){#drawerMessage .intel-grid{gap:5px!important}#drawerMessage .intel-grid > button.intel-ghost{font-size:11px!important;padding-inline:2px!important}}
+
+/* Beta: fit the full 30-ghost list in one iPhone viewport. */
+.drawer:has(.intel-grid){padding:calc(env(safe-area-inset-top) + 6px) 6px calc(env(safe-area-inset-bottom) + 6px)!important;align-items:center!important;overflow:hidden!important}
+.drawer:has(.intel-grid) .drawer-card{width:min(100%,520px)!important;max-height:calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 14px)!important;padding:clamp(9px,1.5dvh,14px)!important;overflow-y:auto!important}
+.drawer:has(.intel-grid) .drawer-head{padding:2px 0 4px!important;top:0!important}
+.drawer:has(.intel-grid) #drawerMessage{margin-top:3px!important}
+.drawer:has(.intel-grid) #drawerMessage .intel-panel{gap:clamp(5px,0.8dvh,9px)!important}
+.drawer:has(.intel-grid) .intel-hint{margin:0!important;font:500 clamp(10px,1.3dvh,12px)/1.25 system-ui!important}
+.drawer:has(.intel-grid) #drawerMessage .intel-grid{grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:clamp(3px,0.55dvh,6px)!important}
+.drawer:has(.intel-grid) #drawerMessage .intel-grid>button.intel-ghost{min-height:0!important;height:clamp(38px,5.3dvh,52px)!important;padding:3px 1px!important;font:700 clamp(8px,2.2vw,11px)/1.12 system-ui!important;border-width:1.5px!important;border-radius:7px!important;overflow-wrap:anywhere!important}
+.drawer:has(.intel-grid) #drawerMessage .intel-grid>button.intel-ghost.yellow{background:#514327!important;border-color:#e4b95b!important;color:#ffe7a4!important}
+@media(max-height:700px){.drawer:has(.intel-grid) #drawerMessage .intel-grid>button.intel-ghost{height:35px!important}.drawer:has(.intel-grid) .drawer-head{padding:0!important}}
+
+.behavior-coach .behavior-question{font-size:clamp(17px,2.4dvh,22px);line-height:1.3;font-weight:700}
+.behavior-coach .behavior-buttons{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin:12px 0}
+.behavior-coach .behavior-buttons button{min-height:54px;border-radius:9px;border:2px solid #d6ae5b;background:#403a2d;color:#fff2cb;font:800 13px system-ui}
+.behavior-coach .intel-detail{margin-bottom:10px}
+
+/* Compact detective case analysis */
+#drawerMessage:has(.case-analysis){display:block!important;width:100%;margin-top:10px}
+.drawer:has(.case-analysis) .drawer-card{width:min(100%,520px);max-height:calc(100dvh - 35px);overflow-y:auto}
+.case-analysis{font:500 14px/1.4 system-ui;color:#e8eef1;display:flex;flex-direction:column;gap:12px}
+.case-counts{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:10px 2px 15px;border-bottom:1px solid #46535c}
+.case-counts>div{display:flex;flex-direction:column;gap:3px}
+.case-counts small{font-size:10px;letter-spacing:1px;color:#a8b5be}
+.case-counts strong{font-size:23px;line-height:1.1;color:#d2d8dd}
+.case-counts .case-green{color:#79dca5}
+.case-section-title{font-weight:750;font-size:14px}
+.case-list{display:flex;flex-direction:column;gap:6px}
+.case-list[hidden],.case-detail[hidden]{display:none!important}
+.case-ghost{display:flex!important;align-items:center!important;text-align:left!important;gap:11px!important;width:100%!important;min-height:58px!important;padding:11px!important;background:#202b32!important;border:1px solid #46535c!important;border-radius:10px!important;color:#edf3f5!important;box-shadow:none!important}
+.case-ghost.case-in{border-color:#4b7967!important}
+.case-symbol{font-size:21px;font-weight:700;color:#e17c84;width:20px;flex-shrink:0}
+.case-in .case-symbol{color:#76dca6}
+.case-copy{display:flex;flex-direction:column;gap:3px;flex:1;min-width:0}
+.case-copy strong{font-size:15px}
+.case-copy small{font-size:11px;line-height:1.35;color:#b9c7cd;font-weight:450}
+.case-arrow{font-size:22px;color:#a9bac2}
+.case-toggle{display:flex!important;align-items:center;justify-content:space-between;width:100%;min-height:46px;padding:10px 12px!important;border:1px solid #4a5b65!important;border-radius:9px!important;background:#26333b!important;color:#e6eef2!important;font-weight:750!important}
+.case-toggle small{color:#a9bac2}
+.case-detail{padding:12px;border:1px solid #567482;border-radius:10px;background:#253740}
+.case-detail p{font-size:12px;line-height:1.5}
+.case-detail small{color:#b3c6d0;font-size:11px}
+.case-empty{font-size:12px;color:#f0c9a2}
+
+/* Ghost investigation accordion */
+.case-accordion,.case-group{border:1px solid #46535c;border-radius:10px;background:#202b32;overflow:hidden}
+.case-accordion>summary,.case-group>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:11px;padding:12px;color:#edf3f5}
+.case-accordion>summary::-webkit-details-marker,.case-group>summary::-webkit-details-marker{display:none}
+.case-accordion>summary .case-copy{flex:1}
+.case-accordion>summary .case-copy small{display:block;margin-top:3px}
+.case-accordion[open]>summary .case-arrow,.case-group[open]>summary span{transform:rotate(180deg)}
+.case-accordion-body{border-top:1px solid #46535c;padding:12px;display:flex;flex-direction:column;gap:10px}
+.case-verdict{border-left:3px solid #d77c82;padding:6px 10px;background:#382d32;border-radius:4px}
+.case-verdict.case-possible{border-color:#79dca5;background:#263c35}
+.case-verdict strong,.case-next strong{font-size:10px;letter-spacing:.6px}
+.case-verdict p,.case-next p{font-size:12px;line-height:1.5;margin:4px 0}
+.case-subhead{font-weight:750;font-size:12px}
+.case-check{display:flex;gap:10px;align-items:flex-start;font-size:12px}
+.case-check-icon{font-size:19px;color:#91a5b0;line-height:1}
+.case-check-icon.checked{color:#79dca5}
+.case-check strong{display:block;font-size:12px}
+.case-check small{display:block;color:#aebdc6;font-size:11px;margin-top:2px}
+.case-next{border-top:1px solid #46535c;padding-top:10px}
+.case-next p{color:#c4d4dc}
+.case-disclaimer{color:#94a9b4;font-size:10px}
+.case-group{background:#26333b}
+.case-group>summary{justify-content:space-between;font-weight:750}
+.case-group>.case-list{padding:0 7px 7px}
+.case-group .case-accordion{margin-top:6px}
+
+/* Minimal navigation menu */
+.drawer:has(.menu-simple){padding:18px!important;align-items:center!important}
+.drawer:has(.menu-simple) .drawer-card{width:min(100%,390px)!important;max-height:calc(100dvh - 70px)!important;padding:18px!important;overflow:auto!important;border-radius:18px!important}
+.drawer:has(.menu-simple) #drawerMessage{display:block!important;margin:10px 0 0!important}
+.drawer:has(.menu-simple) .drawer-actions{display:none!important}
+.menu-simple{display:flex;flex-direction:column;gap:2px;font-family:system-ui}
+.menu-item{width:100%;min-height:67px;display:flex;align-items:center;gap:12px;text-align:left;text-decoration:none;border:0;border-bottom:1px solid #45535b;background:transparent;color:#e9f0f2;padding:10px 4px;cursor:pointer}
+.menu-item:last-of-type{border-bottom:0}
+.menu-item-icon{width:28px;text-align:center;font-size:24px;color:#aabdc6}
+.menu-item>span:nth-child(2){display:flex;flex:1;flex-direction:column;gap:3px}
+.menu-item strong{font-size:14px;font-weight:700}
+.menu-item small{font-size:11px;color:#b0c0c8}
+.menu-item b{font-size:24px;color:#9fb1ba;font-weight:400}
+.menu-simple .menu-confirm{margin-top:14px;padding:14px;background:#252e33;border:1px solid #60717a;border-radius:11px}
+.menu-simple .menu-confirm strong{font-size:15px}
+.menu-simple .menu-confirm>span:not(.menu-confirm-actions){color:#c5d2d8;font-size:12px}
+.menu-simple .menu-confirm-actions button{min-height:44px;font-size:12px}
+.menu-simple .menu-confirm-actions button:first-child{background:#8d3439;border-color:#bc7477}

@@ -98,7 +98,7 @@ tempTick();
 const uvKey='ghost-intel-uv-v1';let uvEntries=[];
 try{const saved=JSON.parse(localStorage.getItem(uvKey)||'[]');if(Array.isArray(saved))uvEntries=saved.filter(x=>x&&['yes','no','unsure'].includes(x.result));}catch(e){}
 function uvSave(){localStorage.setItem(uvKey,JSON.stringify(uvEntries));}
-function uvSync(){document.querySelector('[data-id="uv"]').classList.toggle('evidence-confirmed',uvEntries.some(x=>x.result==='yes'));}
+function uvSync(){document.querySelector('[data-id="uv"]').classList.toggle('evidence-confirmed',(uvEntries.some(x=>x.result==='yes')||saltHistory.some(x=>x.salt==='yes'&&x.uv==='found')));}
 function openUv(){
  title.textContent='UV / Fingerprints';actions.hidden=true;drawer.hidden=false;
  const count=uvEntries.filter(x=>x.result==='no'&&x.valid===true&&x.type==='object').length;
@@ -259,9 +259,9 @@ function saltSync(){const tile=document.querySelector('[data-id="salt"]');if(til
 function saltRecord(salt,uv){
  const observation={id:'salt-'+Date.now()+'-'+saltHistory.length,time:new Date().toISOString(),salt,uv};
  saltHistory.push(observation);saltSave();
- // Salt footprints are not standard UV evidence and do not affect Obake calculations.
+ // Verified ghost UV footprints after stepping in salt count as UV evidence; they do not affect Obake fingerprint-failure counts.
  try{localStorage.setItem(saltUvKey,JSON.stringify(saltHistory.filter(x=>x.uv!=='not checked')));}catch(e){}
- saltStage='result';saltSync();openSalt();
+ saltStage='result';saltSync();uvSync();openSalt();
 }
 function openSalt(){
  title.textContent='Salt & Interaction';actions.hidden=true;drawer.hidden=false;message.className='';
@@ -294,7 +294,10 @@ if(button.dataset.id==='emf')openEmf();else if(button.dataset.id==='temperature'
 }));
 
  // ===== UNIFIED INVESTIGATION: NOTES + GHOST LIST (PHASE ONE) =====
-const ghostRoster=['Spirit','Wraith','Phantom','Poltergeist','Banshee','Jinn','Mare','Revenant','Shade','Demon','Yurei','Oni','Yokai','Hantu','Goryo','Myling','Onryo','The Twins','Raiju','Obake','The Mimic','Moroi','Deogen','Thaye'];
+const ghostEvidence=Object.fromEntries("Aswang:writing freezing dots;Banshee:uv orbs dots;Dayan:emf orbs spirit;Deildegast:emf writing dots;Demon:uv writing freezing;Deogen:spirit writing dots;Gallu:emf uv spirit;Goryo:emf uv dots;Hantu:uv orbs freezing;Jinn:emf uv freezing;Kormos:orbs spirit uv;Mare:spirit orbs writing;Moroi:spirit writing freezing;Myling:emf uv writing;Obake:emf uv orbs;Obambo:uv writing dots;Oni:emf freezing dots;Onryo:spirit orbs freezing;Phantom:spirit uv dots;Poltergeist:spirit uv writing;Raiju:emf orbs dots;Revenant:orbs writing freezing;Shade:emf writing freezing;Spirit:emf spirit writing;Thaye:orbs writing dots;The Mimic:spirit uv freezing;The Twins:emf spirit freezing;Wraith:emf spirit dots;Yokai:spirit orbs dots;Yurei:orbs freezing dots".split(";").map(x=>{const i=x.indexOf(":");return [x.slice(0,i),x.slice(i+1).split(" ")];}));
+const ghostRoster=Object.keys(ghostEvidence);
+function confirmedEvidence(){const e=new Set();if(entries.some(x=>x.level===5))e.add('emf');if(temp.confirmed)e.add('freezing');if(uvEntries.some(x=>x.result==='yes')||saltHistory.some(x=>x.salt==='yes'&&x.uv==='found'))e.add('uv');if(spirit.answer==='yes')e.add('spirit');if(orbs.answer==='yes')e.add('orbs');if(dots.answer==='yes')e.add('dots');if(writing.answer==='yes')e.add('writing');return e;}
+
 function investigationSnapshot(){
  const notes=[];
  const add=(source,label,reason,important,time,links)=>notes.push({source,label,reason,important,time:time||'',links:links||[source]});
@@ -302,27 +305,84 @@ function investigationSnapshot(){
  if(temp.confirmed)add('Temperature','Freezing temperatures confirmed','Freezing temperatures count as journal evidence.',true,'',['Temperature']);
  uvEntries.forEach(e=>add('UV',e.result==='yes'?'UV evidence found':e.result==='no'?'No UV found after interaction':'UV observation uncertain',e.result==='yes'?'UV journal evidence confirmed.':e.valid?'A prompt check on a UV-capable surface found no UV. This does not definitively exclude UV.':'This observation does not qualify for the Obake fingerprint-failure counter.',e.result==='yes',e.time,['UV']));
  [['Spirit Box',spirit],['Ghost Orbs',orbs],['D.O.T.S.',dots],['Ghost Writing',writing]].forEach(([name,state])=>{if(state.answer)add(name,state.answer==='yes'?name+' confirmed':name+' not observed',state.answer==='yes'?'Confirmed journal evidence.':'Not observed is not proof of absence.',state.answer==='yes','',[name]);});
- saltHistory.forEach(e=>add('Salt','Salt: '+(e.salt==='yes'?'stepped in':e.salt==='no'?'not disturbed':'uncertain')+(e.uv==='found'?' · UV footprints found':e.uv==='not seen'?' · UV footprints not seen':''),e.salt==='yes'?'Confirmed salt step contradicts Wraith behavior. Salt UV footprints do not confirm journal UV evidence.':'No definitive ghost exclusion from this salt observation.',e.salt==='yes',e.time,['Salt','UV']));
+ saltHistory.filter(e=>e.salt==='yes'&&e.uv==='found').forEach(e=>add('UV','UV footprints confirmed','Verified ghost UV footprints after a salt step count as UV journal evidence.',true,e.time,['Salt','UV']));
+ saltHistory.forEach(e=>add('Salt','Salt: '+(e.salt==='yes'?'stepped in':e.salt==='no'?'not disturbed':'uncertain')+(e.uv==='found'?' · UV footprints found':e.uv==='not seen'?' · UV footprints not seen':''),e.salt==='yes'?'Confirmed salt step contradicts Wraith behavior. Verified ghost UV footprints confirm UV evidence.':'No definitive ghost exclusion from this salt observation.',e.salt==='yes',e.time,['Salt','UV']));
  notes.sort((a,b)=>a.time&&b.time?a.time.localeCompare(b.time):a.time?-1:b.time?1:0);
  return notes;
 }
 function safeText(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
-function ghostAssessment(name){
- const stepped=saltHistory.some(e=>e.salt==='yes');
- if(name==='Wraith'&&stepped)return {status:'red',label:'RULED OUT',reason:'A confirmed ghost step in salt contradicts standard Wraith behavior.',source:'Salt & Interaction'};
- return {status:'yellow',label:'POSSIBLE',reason:'No definitive contradiction has been established by the current limited reasoning rules. This does not guarantee evidence compatibility.',source:'Investigation'};
-}
+function ghostAssessment(name){const seen=confirmedEvidence();const allowed=new Set(ghostEvidence[name]);if(name==='The Mimic')allowed.add('orbs');const bad=[...seen].filter(e=>!allowed.has(e));const saltBad=name==='Wraith'&&saltHistory.some(e=>e.salt==='yes');if(bad.length||saltBad)return {status:'red',label:'INCOMPATIBLE',reason:'Conflicting evidence: '+bad.join(', ')+(saltBad?'; salt step contradicts Wraith.':''),source:'Evidence and observations'};return {status:'yellow',label:'POSSIBLE',reason:'Compatible with '+seen.size+' confirmed evidence types. Remaining clues: '+[...allowed].filter(e=>!seen.has(e)).join(', ')+'. Not a confirmed identity.',source:'Evidence chart'};}
+
 function openGhostList(){
- title.textContent='Ghost List';actions.hidden=true;drawer.hidden=false;message.className='';
+ title.textContent='Ghost Analysis';actions.hidden=true;drawer.hidden=false;message.className='';
  const statuses=ghostRoster.map(name=>({name,...ghostAssessment(name)}));
- message.innerHTML='<section class="intel-panel"><p class="intel-hint">Tap a ghost to see its reasoning. Yellow means not yet ruled out; full evidence compatibility rules are still being developed.</p><div class="intel-grid">'+statuses.map((g,i)=>'<button type="button" class="intel-ghost '+g.status+'" data-ghost="'+i+'">'+safeText(g.name)+'</button>').join('')+'</div><div id="intelGhostDetail" class="intel-detail" hidden></div></section>';
- const detail=document.getElementById('intelGhostDetail');
- message.querySelectorAll('[data-ghost]').forEach(b=>b.onclick=()=>{
-  const g=statuses[Number(b.dataset.ghost)];
-  if(!detail.hidden&&detail.dataset.name===g.name){detail.hidden=true;return;}
-  detail.dataset.name=g.name;detail.hidden=false;
-  detail.innerHTML='<strong>'+safeText(g.name)+' — '+g.label+'</strong><p>'+safeText(g.reason)+'</p><small>Source: '+safeText(g.source)+'</small>';
- });
+ const possible=statuses.filter(g=>g.status!=='red'), eliminated=statuses.filter(g=>g.status==='red');
+ const labels={emf:'EMF Level 5',freezing:'Freezing Temperatures',uv:'UV Evidence',spirit:'Spirit Box',orbs:'Ghost Orbs',dots:'D.O.T.S.',writing:'Ghost Writing'};
+ const seen=confirmedEvidence();
+ const notes=investigationSnapshot();
+ const behaviorLabels={Obake:'Watch for a brief appearance change during a hunt.',Wraith:'Test salt: a confirmed step rules out Wraith.',Phantom:'Photograph a visible ghost and watch whether it disappears.',Banshee:'Listen for the unique parabolic microphone scream.',Deogen:'Check whether it slows dramatically when close during a hunt.',Revenant:'Compare its speed before and after spotting a player.',Hantu:'Compare hunt speed in cold versus warm rooms.',Raiju:'Compare speed near switched-on electronics.',Poltergeist:'Watch for multiple objects thrown at once.','The Mimic':'Look for extra Ghost Orbs and changing copied behaviors.',Goryo:'Check D.O.T.S. through a video camera from outside the room.'};
+ function why(g){
+  const allowed=new Set(ghostEvidence[g.name]);if(g.name==='The Mimic')allowed.add('orbs');
+  const reasons=[...seen].filter(e=>!allowed.has(e)).map(e=>labels[e]+' is confirmed, but '+g.name+' cannot have it.');
+  if(g.name==='Wraith'&&saltHistory.some(x=>x.salt==='yes'))reasons.push('The ghost stepped in salt; Wraith cannot disturb salt.');
+  return reasons;
+ }
+ function row(label,done,detail){return '<div class="case-check"><span class="case-check-icon '+(done?'checked':'')+'">'+(done?'✓':'○')+'</span><span><strong>'+safeText(label)+'</strong><small>'+safeText(detail)+'</small></span></div>';}
+ function card(g){
+  const reasons=why(g), required=ghostEvidence[g.name];
+  const checklist=required.map(e=>row(labels[e],seen.has(e),seen.has(e)?'Confirmed in your investigation':'Not confirmed yet — check this evidence')).join('');
+  const special=g.name==='The Mimic'?row('Extra Ghost Orbs',seen.has('orbs'),seen.has('orbs')?'Observed — Mimic can show extra orbs':'Special Mimic clue; not standard evidence'):'';
+  const behavior=behaviorLabels[g.name]||'Compare ghost-specific behavior after collecting more observations.';
+  const next=required.filter(e=>!seen.has(e)).map(e=>labels[e]);
+  const nextText=g.status==='red'?'Already ruled out — review the contradiction below.':next.length?'Check next: '+next.join(' / ')+'.':'All standard evidence recorded. Compare behavior to verify.';
+  return '<details class="case-accordion '+(g.status==='red'?'case-rejected':'')+'"><summary><span class="case-symbol">'+(g.status==='red'?'×':'✓')+'</span><span class="case-copy"><strong>'+safeText(g.name)+'</strong><small>'+(g.status==='red'?safeText(reasons[0]||'Conflicting observation'):'Still possible · '+required.filter(e=>seen.has(e)).length+'/3 evidence confirmed')+'</small></span><span class="case-arrow">⌄</span></summary><div class="case-accordion-body">'+(reasons.length?'<div class="case-verdict"><strong>WHY RULED OUT</strong><p>'+reasons.map(safeText).join('<br>')+'</p></div>':'<div class="case-verdict case-possible"><strong>STILL POSSIBLE</strong><p>No confirmed contradiction so far.</p></div>')+'<div class="case-subhead">Evidence checklist</div>'+checklist+special+'<div class="case-next"><strong>WHAT TO CHECK NEXT</strong><p>'+safeText(nextText)+'</p><p>'+safeText(behavior)+'</p></div><small class="case-disclaimer">Checkmarks reflect recorded evidence. Missing observations do not automatically eliminate a ghost.</small></div></details>';
+ }
+ message.innerHTML='<section class="case-analysis"><div class="case-counts"><div><small>STILL POSSIBLE</small><strong class="case-green">'+possible.length+' ghosts</strong></div><div><small>RULED OUT</small><strong>'+eliminated.length+' ghosts</strong></div></div><div class="case-section-title">Remaining suspects</div><div class="case-list">'+(possible.length?possible.map(card).join(''):'<p class="case-empty">No ghost matches every confirmed observation. Review your entries.</p>')+'</div><details class="case-group"><summary>Ruled out ('+eliminated.length+') <span>⌄</span></summary><div class="case-list">'+eliminated.map(card).join('')+'</div></details></section>';
+}
+const behaviorBank=[
+ ['phantom-photo','When you took a picture of the ghost while you could see it, did it disappear right away?',['Phantom'],'A disappearing apparition after a successful photo is a distinctive Phantom clue.','strong'],
+ ['phantom-flash','During a hunt, was the ghost invisible for most of the time between flashes?',['Phantom'],'Phantoms tend to be less visible during hunts.','suggestive'],
+ ['polter-pile','Did the ghost throw several objects at the same time?',['Poltergeist'],'A simultaneous multi-object throw is a distinctive Poltergeist clue.','strong'],
+ ['polter-throws','While hunting, did the ghost keep throwing things around?',['Poltergeist'],'Frequent throws support Poltergeist but are not unique.','suggestive'],
+ ['mimic-shift','Did the ghost act like two very different types of ghost in separate hunts?',['The Mimic'],'A Mimic can copy different ghost behaviors, but apparent changes alone do not confirm it.','suggestive'],
+ ['mimic-model','While the ghost was chasing you, did it briefly look like a completely different person?',['Obake','The Mimic'],'A model shift is associated with Obake behavior, which a Mimic may copy.','strong'],
+ ['gallu-protect','After you used incense, a crucifix, or salt, did the ghost start moving faster?',['Gallu'],'Potential Gallu behavior; compare controlled hunts before drawing conclusions.','suggestive'],
+ ['kormos-motion','Did the ghost seem to notice players more when they were walking or running?',['Kormos'],'Potential movement-related behavior; requires controlled observation.','suggestive'],
+ ['banshee-target','Did the ghost keep chasing the same player even when other players were closer?',['Banshee'],'Banshee may favor a single target; line of sight and player position matter.','suggestive'],
+ ['banshee-scream','Did you hear a strange, high-pitched scream through the parabolic microphone?',['Banshee'],'The special scream is a strong Banshee clue.','strong'],
+ ['deogen-close','When the ghost got close to someone during a hunt, did it slow down a lot?',['Deogen'],'Deogen slows dramatically near its target.','strong'],
+ ['revenant-speed','Was the ghost slow until it found someone, then suddenly very fast?',['Revenant'],'Revenant speed is strongly affected by detecting a player.','strong'],
+ ['hantu-cold','Was the ghost faster in cold rooms and slower in warmer rooms?',['Hantu'],'Hantu speed depends on temperature.','strong'],
+ ['raiju-electric','Did the ghost move faster near electronics that were turned on?',['Raiju'],'Raiju can accelerate around active electronic equipment.','strong'],
+ ['myling-audio','Could you only hear the ghost’s footsteps once it was very close?',['Myling'],'Myling footsteps have a shorter audible range.','suggestive'],
+ ['oni-visible','During hunts, could you see the ghost almost the whole time instead of it disappearing between flashes?',['Oni'],'Oni tends to blink less frequently during hunts.','suggestive'],
+ ['oni-airball','Did you see a floating ball of mist move toward a player and vanish?',['Oni'],'Oni cannot perform the airball ghost event; this would argue against Oni if verified.','strong'],
+ ['shade-hunt','Did a normal hunt start while someone was standing in the same room as the ghost?',['Shade'],'Under standard conditions, this observation argues against Shade.','strong'],
+ ['spirit-incense','After using incense near the ghost, did it wait a long time before hunting again?',['Spirit'],'Spirit has a longer incense hunt-prevention period.','strong'],
+ ['demon-cooldown','Did the ghost start another hunt very soon after the last one ended?',['Demon'],'Demon can hunt more frequently than most ghosts.','suggestive'],
+ ['onryo-flames','Did the ghost start hunting right after blowing out a third flame?',['Onryo'],'The flame-triggered hunt is an Onryo clue; proximity and other conditions matter.','strong'],
+ ['mare-light','Did the ghost turn off a light right after someone switched it on?',['Mare'],'Mare has a light-switch interaction ability.','suggestive'],
+ ['twins-pair','Did the ghost touch or move things in two different places almost at the same time?',['The Twins'],'Twins can produce unusually paired interactions.','suggestive'],
+ ['yurei-door','Did a door shut all the way by itself when there was no hunt or ghost event?',['Yurei'],'Yurei has a distinctive door interaction ability.','suggestive'],
+ ['thaye-aging','As time passed, did the ghost seem to get slower and hunt less often?',['Thaye'],'Thaye can age and become less dangerous.','suggestive'],
+ ['yokai-voice','Did the ghost start hunting soon after someone talked near it?',['Yokai'],'Yokai can hunt at higher sanity when players speak nearby.','suggestive'],
+ ['obake-shift','While the ghost was chasing you, did it briefly look like a completely different person?',['Obake','The Mimic'],'A hunt-model change supports Obake or a Mimic copying it.','strong'],
+ ['goryo-stay','Did the ghost stay near the same room instead of wandering around?',['Goryo'],'Goryo tends to roam less, but room behavior alone is not definitive.','suggestive'],
+ ['jinn-breaker','With the power on, did the ghost suddenly speed up when it saw someone far away?',['Jinn'],'Jinn has a conditional speed ability.','suggestive'],
+ ['moroi-curse','After hearing the ghost respond, did someone’s sanity start dropping unusually fast?',['Moroi'],'Moroi can curse players, but sanity changes have other causes.','suggestive']
+];
+let behaviorAnswers={};try{const v=JSON.parse(localStorage.getItem('ghost-intel-behavior-v1')||'{}');if(v&&typeof v==='object'&&!Array.isArray(v))behaviorAnswers=v;}catch{}
+function behaviorCandidates(){return ghostRoster.filter(name=>ghostAssessment(name).status!=='red');}
+function behaviorRanked(){const remaining=behaviorCandidates();return behaviorBank.filter(q=>q[2].some(name=>remaining.includes(name))&&!behaviorAnswers[q[0]]).sort((a,b)=>{const ac=a[2].filter(x=>remaining.includes(x)).length,bc=b[2].filter(x=>remaining.includes(x)).length;return (a[4]==='strong'?0:1)-(b[4]==='strong'?0:1)||ac-bc;});}
+function openBehaviorCoach(){
+ title.textContent="I'm Stuck — Behavior";actions.hidden=true;drawer.hidden=false;message.className='behavior-coach';
+ const remaining=behaviorCandidates(),answered=Object.entries(behaviorAnswers).filter(([id,v])=>behaviorBank.some(q=>q[0]===id)&&v!=='skip');
+ const ranked=behaviorRanked(),next=ranked[0];
+ const hints=answered.filter(([id,v])=>v==='yes').map(([id])=>behaviorBank.find(q=>q[0]===id)).filter(q=>q&&q[2].some(g=>remaining.includes(g)));
+ const candidateSummary=remaining.length+' candidates remain from confirmed equipment evidence.';
+ message.innerHTML='<section class="intel-panel"><p class="intel-hint">'+safeText(candidateSummary)+' Behavioral observations are clues, not automatic exclusions.</p><div class="intel-detail"><strong>BEHAVIOR QUESTION '+(answered.length+1)+'</strong>'+(next?'<p class="behavior-question">'+safeText(next[1])+'</p><div class="behavior-buttons"><button type="button" data-behavior="yes">YES</button><button type="button" data-behavior="no">NO</button><button type="button" data-behavior="skip">NOT SURE</button></div><small>Relevant to: '+safeText(next[2].filter(g=>remaining.includes(g)).join(', '))+'</small>':'<p>No more relevant unanswered behavior questions. Revisit evidence or reset your behavioral answers.</p>')+'</div><div class="intel-detail"><strong>OBSERVATIONS</strong><p>'+safeText(answered.length+' answered · '+hints.length+' positive clue(s)')+'</p>'+(hints.length?hints.map(q=>'<p><b>'+safeText(q[2].filter(g=>remaining.includes(g)).join(', '))+':</b> '+safeText(q[3])+'</p>').join(''):'<p>No positive behavioral clues recorded yet.</p>')+'</div><button type="button" class="intel-stuck" id="behaviorReset">RESET BEHAVIOR ANSWERS</button><small>Answers are stored on this device. They do not alter evidence or turn ghost boxes red.</small></section>';
+ message.querySelectorAll('[data-behavior]').forEach(btn=>btn.onclick=()=>{behaviorAnswers[next[0]]=btn.dataset.behavior;try{localStorage.setItem('ghost-intel-behavior-v1',JSON.stringify(behaviorAnswers));}catch{}openBehaviorCoach();});
+ document.getElementById('behaviorReset').onclick=()=>{if(!confirm('Clear all behavioral answers for this device?'))return;behaviorAnswers={};try{localStorage.removeItem('ghost-intel-behavior-v1');}catch{}openBehaviorCoach();};
 }
 function openNotes(all=false,expanded=-1){
  title.textContent='Investigation Notes';actions.hidden=true;drawer.hidden=false;message.className='';
@@ -331,18 +391,15 @@ function openNotes(all=false,expanded=-1){
  document.getElementById('intelImportant').onclick=()=>openNotes(false);
  document.getElementById('intelAll').onclick=()=>openNotes(true);
  message.querySelectorAll('[data-note]').forEach(b=>b.onclick=()=>{const d=b.querySelector('.intel-note-reason');d.hidden=!d.hidden;message.querySelectorAll('.intel-note-reason').forEach(other=>{if(other!==d)other.hidden=true;});});
- document.getElementById('intelStuck').onclick=()=>{
-  const advice=document.getElementById('intelAdvice');advice.hidden=false;
-  const wraith=ghostAssessment('Wraith');
-  const confirmed=notes.filter(n=>n.reason.includes('journal evidence')&&n.important).map(n=>n.label);
-  advice.innerHTML='<strong>ONE-TIME INVESTIGATION REVIEW</strong><p><b>Known:</b> '+safeText(confirmed.length?confirmed.join('; '):'No journal evidence confirmed in this snapshot.')+'</p><p><b>Behavior:</b> '+safeText(wraith.status==='red'?'Wraith contradicted by confirmed salt step.':'No definitive Wraith salt contradiction recorded.')+'</p><p><b>Next:</b> Investigate a missing journal evidence type and seek a distinctive ghost behavior. A lack of response alone does not rule out evidence.</p><small>Read-only snapshot. No observations or ghost statuses changed.</small>';
- };
+ document.getElementById('intelStuck').onclick=()=>openBehaviorCoach();
+
 }
 document.querySelectorAll('.nav-key').forEach(b=>b.addEventListener('click',()=>{if(b.dataset.page==='ghosts')openGhostList();else if(b.dataset.page==='log')openNotes();else if(b.dataset.page!=='home')show(b.textContent.trim(),'Settings will be available in a future update.');}));
 document.getElementById('notesBtn').addEventListener('click',()=>openNotes());
 function openMenu(){
- title.textContent='Ghost Intel Menu';actions.hidden=false;drawer.hidden=false;
- message.innerHTML='<span class="menu-info">Manage your current investigation. This does not remove the app or original prototype.</span><button type="button" class="menu-clear" id="menuClear">CLEAR ALL INVESTIGATION DATA</button><span class="menu-confirm" id="menuConfirm" hidden><strong>Reset the entire investigation?</strong><span>All EMF readings, UV observations, evidence highlights, thermometer, Spirit Box, Ghost Orbs, D.O.T.S. and Ghost Writing and Salt observations and active countdown will be cleared. This cannot be undone.</span><span class="menu-confirm-actions"><button type="button" id="menuClearYes">YES, RESET ALL</button><button type="button" id="menuClearNo">CANCEL</button></span></span>';
+ title.textContent='Menu';actions.hidden=true;drawer.hidden=false;
+ message.innerHTML='<div class="menu-simple"><button type="button" class="menu-item" id="menuClear"><span class="menu-item-icon">↻</span><span><strong>New Investigation</strong><small>Start a fresh ghost hunt</small></span><b>›</b></button><a class="menu-item" href="investigation-original.html"><span class="menu-item-icon">▤</span><span><strong>Original Prototype</strong><small>Open the previous version</small></span><b>›</b></a><button type="button" class="menu-item" id="menuBack"><span class="menu-item-icon">⌂</span><span><strong>Device Dashboard</strong><small>Return to equipment</small></span><b>›</b></button><div class="menu-confirm" id="menuConfirm" hidden><strong>Start a new investigation?</strong><span>Your current evidence and observations will be cleared. This cannot be undone.</span><span class="menu-confirm-actions"><button type="button" id="menuClearYes">START NEW</button><button type="button" id="menuClearNo">CANCEL</button></span></div></div>';
+ document.getElementById('menuBack').onclick=hide;
  const confirm=document.getElementById('menuConfirm');
  document.getElementById('menuClear').onclick=()=>{confirm.hidden=false;document.getElementById('menuClearYes').focus();};
  document.getElementById('menuClearNo').onclick=()=>{confirm.hidden=true;document.getElementById('menuClear').focus();};
@@ -350,7 +407,7 @@ function openMenu(){
   entries=[];temp={phase:'placement',started:0,confirmed:false,checks:[]};uvEntries=[];spirit={checks:[],answer:''};orbs={checks:[],answer:''};spiritSkip=false;spiritShowChecklist=false;orbsSkip=false;orbsShowChecklist=false;dots={checks:[],answer:''};dotsSkip=false;dotsShowChecklist=false;writing={checks:[],answer:''};writingSkip=false;writingShowChecklist=false;saltHistory=[];saltStage='salt';
   try{[...Array(localStorage.length)].map((_,i)=>localStorage.key(i)).filter(k=>k&&k.startsWith('ghost-intel-')).forEach(k=>localStorage.removeItem(k));}catch(e){}
   update();tempTick();uvSync();spiritSync();orbsSync();dotsSync();writingSync();saltSync();confirm.hidden=true;
-  message.innerHTML='<span class="menu-success">Investigation data cleared. EMF, Temperature, UV, Spirit Box, Ghost Orbs, D.O.T.S. and Ghost Writing and Salt are ready for a fresh investigation.</span><button type="button" class="menu-clear-done" id="menuDone">RETURN TO DASHBOARD</button>';
+  message.innerHTML='<span class="menu-success">New investigation ready.</span><button type="button" class="menu-clear-done" id="menuDone">RETURN TO DASHBOARD</button>';
   document.getElementById('menuDone').onclick=hide;
  };
  document.getElementById('closeDrawer').focus();
