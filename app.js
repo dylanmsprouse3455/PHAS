@@ -103,15 +103,15 @@ function uvSync(){const tile=document.querySelector('[data-id="uv"]');if(tile){c
 function uvStats(){
  const negatives=uvEntries.filter(e=>e.result==='no'&&e.valid===true).length;
  const positive=uvEntries.filter(e=>e.result==='yes').length;
- const uncertain=uvEntries.length-negatives-positive;
+ const other=uvEntries.length-negatives-positive;
  const chance=Math.pow(.25,negatives)*100;
- const percentage=negatives===0?'—':chance>=.01?chance.toFixed(2)+'%':chance.toExponential(2)+'%';
- const warning=positive?'UV evidence confirmed. Negative checks are still logged.':negatives>=5?'Five valid negatives: strong warning against UV under standard settings; not an elimination.':negatives>=3?'Three valid negatives: UV is less likely under standard settings; not eliminated.':'Continue checking confirmed interactions promptly.';
- return {negatives,positive,uncertain,percentage,warning};
+ const percentage=negatives===0?'—':chance>=.01?Number(chance.toFixed(2))+'%':'Less than 0.01%';
+ const warning=positive?'You found UV evidence.':negatives>=5?'You checked 5 or more times without finding UV. UV is much less likely, but still possible.':negatives>=3?'You checked at least 3 times without finding UV. UV is becoming less likely.':'Keep checking right after the ghost touches something.';
+ return {negatives,positive,other,percentage,warning};
 }
 function uvStatsMarkup(){
  const s=uvStats();
- return '<section class="uv-stats" aria-label="UV statistics"><strong>UV INTERACTION ANALYSIS</strong><span class="uv-stat-grid"><span><b>'+s.negatives+'</b><small>Valid negative checks</small></span><span><b>'+(s.positive?'CONFIRMED':s.percentage)+'</b><small>'+(s.positive?'UV evidence':'Obake no-print streak')+'</small></span></span><span class="uv-check-track">'+Array.from({length:5},(_,i)=>'<i class="'+(i<s.negatives?'filled':'')+'"></i>').join('')+'</span><span class="uv-hint">'+s.warning+'</span><span class="uv-hint">'+uvEntries.length+' total observations · '+s.uncertain+' uncertain/unverified</span><span class="uv-disclaimer">The percentage is the chance an Obake leaves no UV on every one of these independent valid checks (25% each), NOT the probability your ghost is Obake or that UV is absent.</span><button type="button" class="uv-back" id="uvUndo" '+(!uvEntries.length?'disabled':'')+'>UNDO LAST OBSERVATION</button><span class="uv-disclaimer" id="uvDetails" hidden>Chance of an Obake leaving no UV on each independent valid check (25% each). Not the probability the ghost is Obake or UV is absent.</span></section>';
+ return '<section class="uv-stats" aria-label="UV check results"><strong>YOUR UV RESULTS</strong><span class="uv-stat-grid"><span><b>'+s.negatives+'</b><small>Good checks with no UV</small></span><span><b>'+(s.positive?'YES':s.percentage)+'</b><small>'+(s.positive?'UV found':'Chance an Obake missed every check')+'</small></span></span><span class="uv-check-track">'+Array.from({length:5},(_,i)=>'<i class="'+(i<s.negatives?'filled':'')+'"></i>').join('')+'</span><span class="uv-hint">'+s.warning+'</span><span class="uv-mini">'+uvEntries.length+' checks saved · '+s.other+' not counted in the odds <button type="button" id="uvInfo" aria-label="Explain the odds">ⓘ</button></span><button type="button" class="uv-back" id="uvUndo" '+(!uvEntries.length?'disabled':'')+'>UNDO LAST CHECK</button><span class="uv-disclaimer" id="uvDetails" hidden>For an Obake, each properly checked surface interaction has about a 25% chance of leaving no UV. This number shows the chance it missed every counted check. It does NOT mean your ghost has that percentage chance of being an Obake. Salt and uncertain checks are not included in this calculation.</span></section>';
 }
 function uvAttachUndo(){const info=document.getElementById('uvInfo');if(info)info.onclick=()=>{const x=document.getElementById('uvDetails');if(x)x.hidden=!x.hidden;};const b=document.getElementById('uvUndo');if(b)b.onclick=()=>{if(!uvEntries.length)return;uvEntries.pop();uvSave();uvSync();uvStep('done');};}
 function uvRecord(result,unusual='not-asked',valid=false){
