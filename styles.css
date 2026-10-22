@@ -90,3 +90,10 @@
 .drawer:has(#emfChecks) .emf-clear-confirm{margin:0;padding:9px;gap:5px;font-size:12px}
 .drawer:has(#emfChecks) .emf-clear-actions button{min-height:38px}
 @media(max-height:750px){.drawer:has(#emfChecks) .drawer-card{padding:9px}.drawer:has(#emfChecks) #drawerMessage{gap:5px}.drawer:has(#emfChecks) .emf-warning{padding:6px}.drawer:has(#emfChecks) .emf-level{min-height:50px}.drawer:has(#emfChecks) .emf-dot{width:9px;height:9px}}
+
+
+/* Confirmation occupies the panel rather than extending it */
+.drawer:has(#emfChecks) .drawer-card{position:relative}
+.drawer:has(#emfChecks) .emf-clear-confirm:not([hidden]){position:absolute;z-index:5;inset:12px;display:flex;justify-content:center;align-items:stretch;text-align:center;gap:18px;padding:20px;background:linear-gradient(145deg,#3e262a,#17191e);border:2px solid #da7772;box-shadow:0 0 0 8px #0009,0 12px 30px #000c}
+.drawer:has(#emfChecks) .emf-clear-confirm:not([hidden]) strong{font-size:clamp(17px,3dvh,23px)}
+.drawer:has(#emfChecks) .emf-clear-confirm:not([hidden]) .emf-clear-actions{width:100%}
