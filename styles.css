@@ -283,3 +283,17 @@
 .help-dismiss{display:flex;align-items:center;gap:9px;color:#e1edf3;font:600 13px system-ui}
 .help-dismiss input{width:19px;height:19px;accent-color:#78c6a0}
 .checklist-help .spirit-back{min-height:48px}
+
+
+/* ===== SALT OBSERVATION CAPTURE ===== */
+.salt-panel{display:flex;flex-direction:column;gap:13px;font-family:system-ui,sans-serif}
+.salt-captured{padding:17px 15px;border:1.5px solid #447e65;border-radius:16px;background:#203e33;color:#d7f2df;display:flex;flex-direction:column;gap:14px}
+.salt-captured-title{font:800 clamp(15px,4.5vw,21px)/1.25 system-ui;color:#ddf6e5}
+.salt-fact{display:flex;align-items:center;justify-content:space-between;gap:10px;font:500 15px system-ui}
+.salt-fact b{color:#f0fff4;font-weight:700}
+.salt-rule{border-top:1px solid #507765;margin:4px 0}
+.salt-confirm{font:500 13px system-ui;color:#d3efdd}
+.salt-captured p{margin:0;color:#d5ebdc;font:500 12px/1.5 system-ui}
+.salt-captured small{color:#bcd9c8;font:400 11px/1.5 system-ui}
+.salt-again{border:0;border-radius:100px;background:#eef1ef;color:#11191c;font:750 15px system-ui;min-height:53px;width:100%}
+.equipment.observation-recorded:after{content:"✓";position:absolute;right:5px;top:5px;display:grid;place-items:center;width:20px;height:20px;border-radius:50%;background:#285d42;color:#d6f6df;font:800 13px system-ui;box-shadow:0 0 0 2px #10191c}
