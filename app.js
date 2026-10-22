@@ -97,46 +97,20 @@ tempTick();
 
 const uvKey='ghost-intel-uv-v1';let uvEntries=[];
 try{const saved=JSON.parse(localStorage.getItem(uvKey)||'[]');if(Array.isArray(saved))uvEntries=saved.filter(x=>x&&['yes','no','unsure'].includes(x.result));}catch(e){}
-let uvDraft=null;
-function uvSave(){try{localStorage.setItem(uvKey,JSON.stringify(uvEntries));}catch(e){}}
-function uvSync(){const tile=document.querySelector('[data-id="uv"]');if(tile){const found=uvEntries.some(e=>e.result==='yes');tile.classList.toggle('evidence-confirmed',found);tile.setAttribute('aria-label',found?'UV evidence confirmed':'UV and Footprints');}}
-function uvStats(){
- const negatives=uvEntries.filter(e=>e.result==='no'&&e.valid===true).length;
- const positive=uvEntries.filter(e=>e.result==='yes').length;
- const other=uvEntries.length-negatives-positive;
- const chance=Math.pow(.25,negatives)*100;
- const percentage=negatives===0?'—':chance>=.01?Number(chance.toFixed(2))+'%':'<0.01%';
- const next=positive?'UV confirmed! Look for other evidence.':negatives>=5?'No UV found after 5 ghost interactions. UV is unlikely; look for other evidence.':negatives>=3?'No UV found after 3 ghost interactions. Watch for another interaction and check for UV.':'Wait for the ghost to touch a door or surface, then check for UV.';
- return {negatives,positive,other,percentage,next};
-}
-function uvStatsMarkup(){
- const s=uvStats();
- return '<section class="uv-stats" aria-label="UV interaction analysis"><span class="uv-stats-heading"><strong>UV INTERACTION ANALYSIS</strong><button type="button" id="uvInfo" aria-label="More about UV statistics">ⓘ</button></span><span class="uv-stat-grid"><span><b>'+s.negatives+'</b><small>Ghost interactions with no UV</small></span><span><b>'+(s.positive?'YES':s.percentage)+'</b><small>'+(s.positive?'UV found':'Chance an Obake leaves no UV this many times')+'</small></span></span><span class="uv-check-track">'+Array.from({length:5},(_,i)=>'<i class="'+(i<s.negatives?'filled':'')+'"></i>').join('')+'</span><span class="uv-next">➜ '+s.next+'</span><button type="button" class="uv-back" id="uvUndo" '+(!uvEntries.length?'disabled':'')+'>UNDO LAST CHECK</button><span class="uv-disclaimer" id="uvDetails" hidden>'+uvEntries.length+' observations saved; '+s.other+' not included in the calculation. This percentage is how often an Obake could leave no UV across all counted ghost interactions, assuming independent interactions. It is NOT the chance your ghost is an Obake. Only confirmed ghost interactions with objects or surfaces, checked promptly, count toward this number. Salt and uncertain observations do not.</span></section>';
-}
-function uvAttachUndo(){const info=document.getElementById('uvInfo');if(info)info.onclick=()=>{const x=document.getElementById('uvDetails');if(x)x.hidden=!x.hidden;};const b=document.getElementById('uvUndo');if(b)b.onclick=()=>{if(!uvEntries.length)return;uvEntries.pop();uvSave();uvSync();uvStep('done');};}
-function uvRecord(result,unusual='not-asked',valid=false){
- uvEntries.push({type:uvDraft.type,result,unusual,valid:result==='no'&&valid,time:new Date().toISOString()});uvSave();uvSync();uvStep('done');
-}
-function uvStep(step){
+function uvSave(){localStorage.setItem(uvKey,JSON.stringify(uvEntries));}
+function uvSync(){document.querySelector('[data-id="uv"]').classList.toggle('evidence-confirmed',uvEntries.some(x=>x.result==='yes'));}
+function openUv(){
  title.textContent='UV / Fingerprints';actions.hidden=true;drawer.hidden=false;
- const controls=items=>'<span class="uv-options">'+items.map(([label,value])=>'<button type="button" data-uv="'+value+'">'+label+'</button>').join('')+'</span>';
- if(step==='type'){
-  uvDraft={type:null};
-  message.innerHTML='<span class="uv-title">WHAT DID THE GHOST INTERACT WITH?</span>'+controls([['SALT / FOOTPRINTS','salt'],['OBJECT / SURFACE','object']])+'<span class="uv-hint">Objects include doors, windows, light switches and other UV-capable surfaces.</span>';
-  message.querySelectorAll('[data-uv]').forEach(b=>b.onclick=()=>{uvDraft.type=b.dataset.uv;uvStep('result');});
- }else if(step==='result'){
-  message.innerHTML='<span class="uv-title">DID YOU SEE UV?</span>'+controls([['YES — UV FOUND','yes'],['NO UV — CHECKED PROMPTLY','no'],['NOT SURE / SKIP','unsure']])+'<span class="uv-hint">Only select No UV if you checked promptly after a confirmed interaction. Salt footprints are tracked separately from Obake door/surface no-print odds.</span><button class="uv-back" id="uvBack">BACK</button>';
-  message.querySelectorAll('[data-uv]').forEach(b=>b.onclick=()=>{const result=b.dataset.uv;uvRecord(result,'not-asked',result==='no'&&uvDraft.type==='object');});
-  document.getElementById('uvBack').onclick=()=>uvStep('type');
- }else{
-  const last=uvEntries[uvEntries.length-1],found=uvEntries.some(e=>e.result==='yes');
-  message.innerHTML='<span class="uv-title">'+(last?.result==='yes'?'UV EVIDENCE RECORDED':last?'OBSERVATION SAVED':'UV OBSERVATIONS')+'</span><span class="uv-hint">'+(found?'UV evidence has been observed.':'No UV confirmed yet; absence is not elimination.')+'</span>'+uvStatsMarkup()+'<button class="uv-primary" id="uvAgain">CHECK ANOTHER INTERACTION</button><button class="uv-back" id="uvDone">BACK TO DEVICE</button>';
-  document.getElementById('uvAgain').onclick=()=>uvStep('type');
-  document.getElementById('uvDone').onclick=hide;
- }
- uvAttachUndo();document.getElementById('closeDrawer').focus();
+ const count=uvEntries.filter(x=>x.result==='no'&&x.valid).length,found=uvEntries.some(x=>x.result==='yes');
+ const heading=found?'UV CONFIRMED':count>=5?'UV is looking unlikely':count>=3?'UV is becoming less likely':'Keep investigating';
+ const rows=Array.from({length:Math.max(5,count+1)},(_,i)=>'<label class="uv-live-row"><input type="checkbox" data-row="'+i+'" '+(i<count?'checked':'')+' '+(found?'disabled':'')+'>Interaction '+(i+1)+' — No UV</label>').join('');
+ message.innerHTML='<section class="uv-live"><strong class="uv-title">UV INVESTIGATION</strong><p>Tick one box each time the ghost touches a door or object and you promptly check it but find no UV.</p><div class="uv-live-list">'+rows+'</div><label class="uv-live-found"><input id="uvFound" type="checkbox" '+(found?'checked':'')+'> UV FOUND</label><div class="uv-live-result"><strong>'+heading+'</strong><span>'+(found?'UV evidence recorded.':count+' separate ghost interactions checked without UV.')+'</span><small>'+(found?'Look for other evidence.':count>=5?'Consider other evidence, but UV is not ruled out.':'Check the next ghost interaction.')+'</small></div><div class="uv-live-footer"><button id="uvInfo">ⓘ Obake details</button><button id="uvUndo">UNDO LAST</button></div><small id="uvDetails" hidden></small></section>';
+ message.querySelectorAll('[data-row]').forEach(el=>el.onchange=()=>{const i=Number(el.dataset.row);const negatives=uvEntries.filter(x=>x.result==='no'&&x.valid);if(el.checked)uvEntries.push({type:'object',result:'no',valid:true,time:new Date().toISOString()});else{const item=negatives[i];if(item)uvEntries.splice(uvEntries.indexOf(item),1);}uvSave();uvSync();openUv();});
+ document.getElementById('uvFound').onchange=e=>{if(e.target.checked)uvEntries.push({type:'object',result:'yes',time:new Date().toISOString()});else uvEntries=uvEntries.filter(x=>x.result!=='yes');uvSave();uvSync();openUv();};
+ document.getElementById('uvUndo').onclick=()=>{uvEntries.pop();uvSave();uvSync();openUv();};
+ document.getElementById('uvInfo').onclick=()=>{const el=document.getElementById('uvDetails');el.textContent='Obake chance of leaving no UV across '+count+' independent qualifying interactions: '+(100*Math.pow(.25,count)).toFixed(2)+'%. This is not the probability your ghost is an Obake. Salt does not count.';el.hidden=!el.hidden;};
 }
-function openUv(){uvStep('type');}
+
 uvSync();
 
 update();
@@ -153,7 +127,7 @@ function openMenu(){
  document.getElementById('menuClear').onclick=()=>{confirm.hidden=false;document.getElementById('menuClearYes').focus();};
  document.getElementById('menuClearNo').onclick=()=>{confirm.hidden=true;document.getElementById('menuClear').focus();};
  document.getElementById('menuClearYes').onclick=()=>{
-  entries=[];temp={phase:'placement',started:0,confirmed:false,checks:[]};uvEntries=[];uvDraft=null;
+  entries=[];temp={phase:'placement',started:0,confirmed:false,checks:[]};uvEntries=[];
   try{[...Array(localStorage.length)].map((_,i)=>localStorage.key(i)).filter(k=>k&&k.startsWith('ghost-intel-')).forEach(k=>localStorage.removeItem(k));}catch(e){}
   update();tempTick();uvSync();confirm.hidden=true;
   message.innerHTML='<span class="menu-success">Investigation data cleared. EMF, Temperature and UV are ready for a fresh investigation.</span><button type="button" class="menu-clear-done" id="menuDone">RETURN TO DASHBOARD</button>';
